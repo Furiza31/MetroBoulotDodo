@@ -17,6 +17,7 @@ An app to travel in Paris.
 - [Tailwind CSS](https://tailwindcss.com/)
 - [PostCSS](https://postcss.org/)
 - [Prettier](https://prettier.io/)
+- [Shad/cn Vue](https://www.shadcn-vue.com/)
 
 ## Visual Studio Code Extensions
 
