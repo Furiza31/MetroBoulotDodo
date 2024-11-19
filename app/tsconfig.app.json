@@ -24,8 +24,8 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["app/src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
+  "include": ["app/src/**/*.ts", "app/src/**/*.tsx", "app/src/**/*.vue"]
 }
