@@ -1,4 +1,4 @@
-# "Metro Boulot Dodo" APP
+# "Metro Boulot Dodo" datas to JSON
 
 ## Installation
 
@@ -10,10 +10,4 @@ npm install
 
 ```bash
 npm start
-```
-
-## Build
-
-```bash
-npm run build
 ```
