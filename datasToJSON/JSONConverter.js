@@ -80,4 +80,6 @@ export const convertMetroToJSON = (metro, positions, outputFilePath) => {
 
   // Write the graph (formated JSON file) to the output file
   fs.writeFileSync(outputFilePath, JSON.stringify(graph, null, 2), "utf-8");
+
+  return graph;
 };
