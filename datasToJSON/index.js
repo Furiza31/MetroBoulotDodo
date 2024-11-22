@@ -17,6 +17,6 @@ const outputFilePath = path.join(__dirname, OUTPUT_FILENAME);
 const positions = path.join(__dirname, POSITIONSFILENAME);
 
 // convert the file
-convertMetroToJSON(metro, positions, outputFilePath);
+const graph = convertMetroToJSON(metro, positions, outputFilePath);
 
 console.log(`File converted and saved to ${outputFilePath}`);

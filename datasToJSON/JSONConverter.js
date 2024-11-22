@@ -19,6 +19,8 @@ export const convertMetroToJSON = (metro, positions, outputFilePath) => {
     nodes: [],
   };
 
+  const nodeMap = new Map(); // To track nodes by their ID for deduplication
+
   lines.forEach((line) => {
     if (line.trim() === "") return;
 
@@ -27,36 +29,41 @@ export const convertMetroToJSON = (metro, positions, outputFilePath) => {
       const [, summitNumber, name, lineNumber, isTerminus, connection] =
         line.match(/V (\d+)\s+(.+?)\s+;([\d\w]+)\s+;(True|False)\s+(\d+)/);
 
-      let positionFound = false;
-      linesPosition.forEach((position) => {
-        if (position.trim() === "") return;
+      const nodeId = parseInt(summitNumber);
 
-        const [x, y, lineName] = position.split(";");
+      if (!nodeMap.has(nodeId)) {
+        // Find the position for this node
+        let x = null;
+        let y = null;
 
-        // add the node to the graph with its position
-        if (lineName.trim() === name.trim()) {
-          positionFound = true;
-          graph.nodes.push({
-            id: parseInt(summitNumber),
-            name: name.trim(),
-            line: lineNumber.trim(),
-            isTerminus: isTerminus === "True",
-            connection: parseInt(connection),
-            x: parseInt(x),
-            y: parseInt(y),
-          });
-        }
-      });
+        linesPosition.forEach((position) => {
+          if (position.trim() === "") return;
 
-      // add the node to the graph without its position
-      if (!positionFound) {
-        graph.nodes.push({
-          id: parseInt(summitNumber),
+          const [px, py, lineName] = position.split(";");
+
+          if (lineName.trim() === name.trim()) {
+            x = parseInt(px);
+            y = parseInt(py);
+          }
+        });
+
+        // Create the node
+        const node = {
+          id: nodeId,
           name: name.trim(),
           line: lineNumber.trim(),
           isTerminus: isTerminus === "True",
           connection: parseInt(connection),
-        });
+        };
+
+        if (x !== null && y !== null) {
+          node.x = x;
+          node.y = y;
+        }
+
+        // Add the node to graph and nodeMap
+        graph.nodes.push(node);
+        nodeMap.set(nodeId, node);
       }
     }
 
@@ -65,19 +72,19 @@ export const convertMetroToJSON = (metro, positions, outputFilePath) => {
       const [, summitNumber1, summitNumber2, time] =
         line.match(/E (\d+) (\d+) (\d+)/);
 
-      // find the node with the id summitNumber1 and add an edge to it
-      graph.nodes.forEach((node) => {
-        if (node.id === parseInt(summitNumber1)) {
-          node.edges = node.edges || [];
-          node.edges.push({
-            to: parseInt(summitNumber2),
-            time: parseInt(time),
-          });
-        }
-      });
+      const node1 = nodeMap.get(parseInt(summitNumber1));
+      if (node1) {
+        node1.edges = node1.edges || [];
+        node1.edges.push({
+          to: parseInt(summitNumber2),
+          time: parseInt(time),
+        });
+      }
     }
   });
 
-  // Write the graph (formated JSON file) to the output file
+  // Write the graph (formatted JSON file) to the output file
   fs.writeFileSync(outputFilePath, JSON.stringify(graph, null, 2), "utf-8");
+
+  return graph;
 };
