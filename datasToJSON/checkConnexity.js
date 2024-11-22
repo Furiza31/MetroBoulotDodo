@@ -1,5 +1,7 @@
-function checkConnexity(graph){
+export const checkConnexity = (graph) => {
+    let n;
     n = graph.length;
+    let visited;
     visited = Array(n).fill(false);
 
     function dfs(node){
