@@ -4,7 +4,6 @@
  * @returns {Array<Array<number>>} - The adjacency matrix
  */
 export const converttomatrix = (graph) => {
-  // First, validate the input
   if (!graph || typeof graph !== "object") {
     console.error("Invalid input: graph must be an object. Received:", graph);
     throw new TypeError(
@@ -12,7 +11,6 @@ export const converttomatrix = (graph) => {
     );
   }
 
-  // Handle case where graph is passed directly as an array of nodes
   const nodes = Array.isArray(graph) ? graph : graph.nodes;
 
   if (!Array.isArray(nodes)) {
@@ -25,16 +23,16 @@ export const converttomatrix = (graph) => {
     throw new TypeError("Invalid input: graph must have at least one node");
   }
 
-  // 1. Find the maximum node ID to dimension the matrix
+  // Find the maximum node ID to dimension the matrix
   const maxNodeId = Math.max(...nodes.map((node) => node.id));
   const matrixSize = maxNodeId + 1;
 
-  // 2. Initialize the matrix with -1 (no connection)
+  // Initialize the matrix with -1 (no connection)
   const matrix = Array.from({ length: matrixSize }, () =>
     Array(matrixSize).fill(-1)
   );
 
-  // 3. Fill the matrix with edge data
+  // Fill the matrix with edge data
   nodes.forEach((node) => {
     if (!node || typeof node !== "object") {
       console.error("Invalid node in graph:", node);
