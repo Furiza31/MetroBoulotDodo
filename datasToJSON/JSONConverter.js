@@ -1,4 +1,44 @@
 import fs from "fs";
+const metroLineColors = {
+  1: "#FFD700",
+  2: "#0055FF",
+  3: "#66CC66",
+  "3bis": "#99FF99",
+  4: "#BB33CC",
+  5: "#FF9933",
+  6: "#339966",
+  7: "#FF99CC",
+  "7bis": "#FFCCDD",
+  8: "#CCCCCC",
+  9: "#99CC33",
+  10: "#FFCC00",
+  11: "#CC9966",
+  12: "#99FF33",
+  13: "#0033CC",
+  14: "#660099",
+};
+
+/**
+ * Convert x, y coordinates to latitude and longitude
+ * @param {number} x The x coordinate
+ * @param {number} y The y coordinate
+ * @returns {object} An object with latitude and longitude
+ */
+const convertToLatLon = (x, y) => {
+  const xMin = 0,
+    xMax = 1000; // Limites for x
+  const yMin = 0,
+    yMax = 1000; // Limites for y
+  const latMin = 48.815573,
+    latMax = 48.902145; // Limites latitude of Paris
+  const lonMin = 2.224199,
+    lonMax = 2.469921; // Limites longitude of Paris
+
+  const lat = latMin + ((y - yMin) / (yMax - yMin)) * (latMax - latMin);
+  const lon = lonMin + ((x - xMin) / (xMax - xMin)) * (lonMax - lonMin);
+
+  return { latitude: lat, longitude: lon };
+};
 
 /**
  * Convert a metro file and a positions file to a JSON file
@@ -54,11 +94,15 @@ export const convertMetroToJSON = (metro, positions, outputFilePath) => {
           line: lineNumber.trim(),
           isTerminus: isTerminus === "True",
           connection: parseInt(connection),
+          color: metroLineColors[lineNumber.trim()],
         };
 
         if (x !== null && y !== null) {
+          const { latitude, longitude } = convertToLatLon(x, y);
           node.x = x;
           node.y = y;
+          node.latitude = latitude;
+          node.longitude = longitude;
         }
 
         // Add the node to graph and nodeMap
