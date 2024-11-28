@@ -7,6 +7,7 @@ export class GraphService {
   private g: d3.Selection<SVGGElement, unknown, null, undefined>;
   private radius = 5;
   private strokeWidth = 3;
+  private scaleFactor = 2;
 
   constructor(
     graphContainer: HTMLElement,
@@ -47,6 +48,21 @@ export class GraphService {
   private draw(subway: MetroDataType, subwayLines: LineType[]) {
     this.drawLines(subwayLines);
     this.drawStations(subway.nodes);
+    this.drawStationNames(subway);
+  }
+
+  private drawStationNames(subway: MetroDataType) {
+    this.g
+      .selectAll("text")
+      .data(subway.nodes)
+      .enter()
+      .append("text")
+      .attr("x", (station) => station.x * this.scaleFactor)
+      .attr("y", (station) => (station.y + this.radius * 1) * this.scaleFactor)
+      .text((station) => station.name)
+      .attr("font-size", "7px")
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "middle");
   }
 
   private drawLines(subwayLines: LineType[]) {
@@ -55,10 +71,10 @@ export class GraphService {
       .data(subwayLines)
       .enter()
       .append("line")
-      .attr("x1", (line) => line.coords.start.x)
-      .attr("y1", (line) => line.coords.start.y)
-      .attr("x2", (line) => line.coords.end.x)
-      .attr("y2", (line) => line.coords.end.y)
+      .attr("x1", (line) => line.coords.start.x * this.scaleFactor)
+      .attr("y1", (line) => line.coords.start.y * this.scaleFactor)
+      .attr("x2", (line) => line.coords.end.x * this.scaleFactor)
+      .attr("y2", (line) => line.coords.end.y * this.scaleFactor)
       .attr("stroke", (line) => line.color)
       .attr("stroke-width", this.strokeWidth);
   }
@@ -69,8 +85,8 @@ export class GraphService {
       .data(stationsData)
       .enter()
       .append("circle")
-      .attr("cx", (station) => station.x)
-      .attr("cy", (station) => station.y)
+      .attr("cx", (station) => station.x * this.scaleFactor)
+      .attr("cy", (station) => station.y * this.scaleFactor)
       .attr("r", this.radius)
       .attr("fill", (station) => station.color)
       .attr("stroke", "black")
