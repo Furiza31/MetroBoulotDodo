@@ -20,3 +20,18 @@ type Node = {
 export type MetroDataType = {
   nodes: Node[];
 };
+
+export type LineType = {
+  id: number;
+  coords: {
+    start: {
+      x: number;
+      y: number;
+    };
+    end: {
+      x: number;
+      y: number;
+    };
+  };
+  color: string;
+};

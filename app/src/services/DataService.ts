@@ -1,7 +1,6 @@
-import { MetroDataType } from "src/types/DataType";
-import { LineType } from "src/types/LineType";
+import { LineType, MetroDataType } from "src/types/MetroDataType";
 
-export class DataService {
+class DataService {
   private datas: MetroDataType;
   private lines: LineType[];
 
@@ -10,7 +9,7 @@ export class DataService {
     this.lines = [];
   }
 
-  public async getMetroData(): Promise<MetroDataType> {
+  public async getSubwayData(): Promise<MetroDataType> {
     if (this.datas.nodes.length > 0) {
       return this.datas;
     }
@@ -19,12 +18,12 @@ export class DataService {
     return this.datas;
   }
 
-  public async getMetroLines(): Promise<LineType[]> {
+  public async getSubwayLines(): Promise<LineType[]> {
     if (this.lines.length > 0) {
       return this.lines;
     }
     if (this.datas.nodes.length === 0) {
-      await this.getMetroData();
+      await this.getSubwayData();
     }
     this.datas.nodes.forEach((node) => {
       if (node.edges) {
@@ -33,7 +32,17 @@ export class DataService {
           const end = this.getNodeCoords(edge.to);
           if (start && end) {
             this.lines.push({
-              latLngs: [start, end],
+              id: node.id + edge.to,
+              coords: {
+                start: {
+                  x: start[0],
+                  y: start[1],
+                },
+                end: {
+                  x: end[0],
+                  y: end[1],
+                },
+              },
               color: node.color,
             });
           }
@@ -46,8 +55,10 @@ export class DataService {
   private getNodeCoords(id: number) {
     const node = this.datas.nodes.find((n) => n.id === id);
     if (node) {
-      return [node.latitude, node.longitude];
+      return [node.x, node.y];
     }
     return null;
   }
 }
+
+export const dataService = new DataService();

@@ -19,28 +19,6 @@ const metroLineColors = {
 };
 
 /**
- * Convert x, y coordinates to latitude and longitude
- * @param {number} x The x coordinate
- * @param {number} y The y coordinate
- * @returns {object} An object with latitude and longitude
- */
-const convertToLatLon = (x, y) => {
-  const xMin = 0,
-    xMax = 1000; // Limites for x
-  const yMin = 0,
-    yMax = 1000; // Limites for y
-  const latMin = 48.815573,
-    latMax = 48.902145; // Limites latitude of Paris
-  const lonMin = 2.224199,
-    lonMax = 2.469921; // Limites longitude of Paris
-
-  const lat = latMin + ((y - yMin) / (yMax - yMin)) * (latMax - latMin);
-  const lon = lonMin + ((x - xMin) / (xMax - xMin)) * (lonMax - lonMin);
-
-  return { latitude: lat, longitude: lon };
-};
-
-/**
  * Convert a metro file and a positions file to a JSON file
  * @param {*} metro the metro file path
  * @param {*} positions the positions file path
@@ -98,11 +76,8 @@ export const convertMetroToJSON = (metro, positions, outputFilePath) => {
         };
 
         if (x !== null && y !== null) {
-          const { latitude, longitude } = convertToLatLon(x, y);
           node.x = x;
           node.y = y;
-          node.latitude = latitude;
-          node.longitude = longitude;
         }
 
         // Add the node to graph and nodeMap
