@@ -1,12 +1,23 @@
-import { LineType, MetroDataType } from "src/types/MetroDataType";
+import { LineType, MetroDataType, Node } from "src/types/MetroDataType";
 
 class DataService {
+  private static instance: DataService; // Static instance of the class
   private datas: MetroDataType;
   private lines: LineType[];
+  private maxSearchResults = 10;
 
-  constructor() {
+  // Private constructor to prevent instantiation from outside
+  private constructor() {
     this.datas = { nodes: [] };
     this.lines = [];
+  }
+
+  // Static method to get the singleton instance
+  public static getInstance(): DataService {
+    if (!DataService.instance) {
+      DataService.instance = new DataService();
+    }
+    return DataService.instance;
   }
 
   public async getSubwayData(): Promise<MetroDataType> {
@@ -59,6 +70,19 @@ class DataService {
     }
     return null;
   }
+
+  public searchStation(search: string): Node[] {
+    if (this.datas.nodes.length === 0) {
+      return [];
+    }
+    if (search === "") {
+      return [];
+    }
+    const nodes = this.datas.nodes.filter((node) =>
+      node.name.toLowerCase().includes(search.toLowerCase())
+    );
+    return nodes.slice(0, this.maxSearchResults);
+  }
 }
 
-export const dataService = new DataService();
+export const dataService = DataService.getInstance();

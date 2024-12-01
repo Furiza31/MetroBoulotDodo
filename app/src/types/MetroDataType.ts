@@ -3,7 +3,7 @@ type Edge = {
   time: number;
 };
 
-type Node = {
+export type Node = {
   id: number;
   name: string;
   line: string;
