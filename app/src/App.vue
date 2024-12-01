@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { LoaderCircle } from "lucide-vue-next";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import SidePanel from "./components/SidePanel.vue";
 import { dataService } from "./services/DataService";
 import { GraphService } from "./services/GraghService";
@@ -14,6 +14,9 @@ let subwayLines: LineType[] = [];
 const graphContainer = ref(null);
 let graphService: GraphService;
 const search = ref("");
+const stationOne = ref<Node | null>(null);
+const stationTwo = ref<Node | null>(null);
+const stationsSelected = computed(() => stationOne.value && stationTwo.value);
 
 onMounted(async () => {
   isLoading.value = false;
@@ -33,18 +36,31 @@ watch(search, (value) => {
 });
 
 const selectFirstStation = (station: Node) => {
+  stationOne.value = station;
   graphService.setFirstStation(station.id);
 };
 
 const selectSecondStation = (station: Node) => {
+  stationTwo.value = station;
   graphService.setSecondStation(station.id);
 };
+
+watch(stationsSelected, (value) => {
+  if (value) {
+    console.log(
+      dataService.findPath(stationOne.value!.id, stationTwo.value!.id)
+    );
+  }
+});
 </script>
 
 <template>
   <main class="relative block h-screen w-screen">
     <div v-if="!isLoading" class="relative h-screen w-screen flex flex-row">
-      <SidePanel @select-first-station="selectFirstStation" @select-second-station="selectSecondStation" />
+      <SidePanel
+        @select-first-station="selectFirstStation"
+        @select-second-station="selectSecondStation"
+      />
       <div
         class="block h-full w-full"
         id="graphContainer"

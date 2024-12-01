@@ -83,6 +83,23 @@ class DataService {
     );
     return nodes.slice(0, this.maxSearchResults);
   }
+
+  public findPath(
+    start: number,
+    end: number
+  ): {
+    lines: LineType[];
+    distance: number;
+    nodes: Node[];
+    time: number;
+  } {
+    return {
+      lines: [],
+      distance: 0,
+      nodes: [],
+      time: 0,
+    };
+  }
 }
 
 export const dataService = DataService.getInstance();
