@@ -1,4 +1,9 @@
-import { LineType, MetroDataType, Node } from "src/types/MetroDataType";
+import {
+  LineType,
+  MetroDataType,
+  Node,
+  PathType,
+} from "src/types/MetroDataType";
 
 class DataService {
   private static instance: DataService; // Static instance of the class
@@ -84,14 +89,7 @@ class DataService {
     return nodes.slice(0, this.maxSearchResults);
   }
 
-  public findPath(
-    start: number,
-    end: number
-  ): {
-    lines: LineType[];
-    nodes: Node[];
-    time: number;
-  } {
+  public findPath(start: number, end: number): PathType {
     // exmple complexe de la destination entre Europe et Monceau avec un changement à Villiers
     return {
       lines: [

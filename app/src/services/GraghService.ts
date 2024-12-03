@@ -1,5 +1,10 @@
 import * as d3 from "d3";
-import { LineType, MetroDataType, Node } from "src/types/MetroDataType";
+import {
+  LineType,
+  MetroDataType,
+  Node,
+  PathType,
+} from "src/types/MetroDataType";
 
 export class GraphService {
   private window: Window;
@@ -71,9 +76,23 @@ export class GraphService {
   }
 
   private drawLines(subwayLines: LineType[]) {
+    const drawnLines = new Set<string>();
+
     this.g
       .selectAll("line")
-      .data(subwayLines)
+      .data(
+        subwayLines.filter((line) => {
+          const lineKey = `${line.coords.start.x},${line.coords.start.y}-${line.coords.end.x},${line.coords.end.y}`;
+          const reverseKey = `${line.coords.end.x},${line.coords.end.y}-${line.coords.start.x},${line.coords.start.y}`;
+
+          if (drawnLines.has(lineKey) || drawnLines.has(reverseKey)) {
+            return false;
+          }
+
+          drawnLines.add(lineKey);
+          return true;
+        })
+      )
       .enter()
       .append("line")
       .attr("x1", (line) => line.coords.start.x * this.scaleFactor)
@@ -85,9 +104,20 @@ export class GraphService {
   }
 
   private drawStations(stationsData: MetroDataType["nodes"]) {
+    const drawnCoordinates = new Set<string>();
+
     this.g
       .selectAll("circle")
-      .data(stationsData)
+      .data(
+        stationsData.filter((station) => {
+          const coordKey = `${station.x},${station.y}`;
+          if (drawnCoordinates.has(coordKey)) {
+            return false;
+          }
+          drawnCoordinates.add(coordKey);
+          return true;
+        })
+      )
       .enter()
       .append("circle")
       .attr("cx", (station) => station.x * this.scaleFactor)
@@ -95,7 +125,8 @@ export class GraphService {
       .attr("r", this.radius)
       .attr("fill", (station) => station.color)
       .attr("stroke", "black")
-      .attr("stroke-width", 1);
+      .attr("stroke-width", 1)
+      .attr("data-id", (station) => station.id);
 
     this.drawStationNames(stationsData);
   }
@@ -104,10 +135,12 @@ export class GraphService {
     this.g.attr("transform", transform.toString());
   }
 
-  public setStartStation(stationIndex: number) {
-    const station = this.g.selectAll<SVGCircleElement, Node>("circle").data()[
-      stationIndex
-    ];
+  public setStartStation(stationId: number) {
+    const station = this.g
+      .selectAll<SVGCircleElement, Node>("circle")
+      .data()
+      .find((d) => d.id === stationId);
+
     if (!station) {
       console.error("Station not found");
       return;
@@ -121,20 +154,19 @@ export class GraphService {
       .selectAll<SVGCircleElement, Node>("circle")
       .transition()
       .duration(500)
-      .attr("r", (_, i) =>
-        i === this.end?.id || i === stationIndex ? this.radius * 2 : this.radius
-      )
-      .attr("fill", (d, i) =>
-        i === this.end?.id || i === stationIndex ? "red" : d.color
+      .attr("fill", (d) =>
+        d.id === this.end?.id || d.id === stationId ? "red" : d.color
       );
   }
 
-  public setEndStation(stationIndex: number) {
+  public setEndStation(stationId: number) {
     const endStation = this.g
       .selectAll<SVGCircleElement, Node>("circle")
-      .data()[stationIndex];
+      .data()
+      .find((d) => d.id === stationId);
+
     if (!endStation) {
-      console.error("Second station not found");
+      console.error("Station not found");
       return;
     }
 
@@ -146,13 +178,8 @@ export class GraphService {
       .selectAll<SVGCircleElement, Node>("circle")
       .transition()
       .duration(500)
-      .attr("r", (_, i) =>
-        i === this.start?.id || i === stationIndex
-          ? this.radius * 2
-          : this.radius
-      )
-      .attr("fill", (d, i) =>
-        i === this.start?.id || i === stationIndex ? "red" : d.color
+      .attr("fill", (d) =>
+        d.id === this.start?.id || d.id === stationId ? "red" : d.color
       );
   }
 
@@ -164,10 +191,11 @@ export class GraphService {
       Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2)
     );
 
-    const zoomFactor = Math.min(
-      this.window.innerWidth / (distance * this.scaleFactor),
-      this.window.innerHeight / (distance * this.scaleFactor)
-    );
+    const zoomFactor =
+      Math.min(
+        this.window.innerWidth / (distance * this.scaleFactor),
+        this.window.innerHeight / (distance * this.scaleFactor)
+      ) - 7;
 
     const zoomScale = Math.max(1, zoomFactor);
 
@@ -190,7 +218,7 @@ export class GraphService {
   }
 
   private centerOnStation(station: Node) {
-    const zoomScale = 3;
+    const zoomScale = 2;
 
     const translateX =
       this.window.innerWidth / 2 -
@@ -226,5 +254,41 @@ export class GraphService {
     if (this.start && this.end) {
       this.centerBetweenStations(this.start, this.end);
     }
+  }
+
+  public highlightPath(path: PathType) {
+    this.g
+      .selectAll<SVGCircleElement, Node>("circle")
+      .transition()
+      .duration(500)
+      .attr("fill", (d) =>
+        path.nodes.some((node) => node.id === d.id) ? "red" : d.color
+      );
+
+    this.g
+      .selectAll<SVGLineElement, LineType>("line")
+      .transition()
+      .duration(500)
+      .attr("stroke", (line) =>
+        path.lines.some((pathLine) => this.isSameLine(pathLine, line))
+          ? "red"
+          : line.color
+      );
+  }
+
+  private isSameLine(line1: LineType, line2: LineType): boolean {
+    const isDirectMatch =
+      line1.coords.start.x === line2.coords.start.x &&
+      line1.coords.start.y === line2.coords.start.y &&
+      line1.coords.end.x === line2.coords.end.x &&
+      line1.coords.end.y === line2.coords.end.y;
+
+    const isReverseMatch =
+      line1.coords.start.x === line2.coords.end.x &&
+      line1.coords.start.y === line2.coords.end.y &&
+      line1.coords.end.x === line2.coords.start.x &&
+      line1.coords.end.y === line2.coords.start.y;
+
+    return isDirectMatch || isReverseMatch;
   }
 }

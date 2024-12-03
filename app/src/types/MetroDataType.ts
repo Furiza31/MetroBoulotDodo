@@ -33,3 +33,9 @@ export type LineType = {
   };
   color: string;
 };
+
+export type PathType = {
+  nodes: Node[];
+  lines: LineType[];
+  time: number;
+};

@@ -4,7 +4,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import SidePanel from "./components/SidePanel.vue";
 import { dataService } from "./services/DataService";
 import { GraphService } from "./services/GraghService";
-import { LineType, MetroDataType, Node } from "./types/MetroDataType";
+import { LineType, MetroDataType, Node, PathType } from "./types/MetroDataType";
 
 const isLoading = ref(true);
 let subway: MetroDataType = {
@@ -17,6 +17,7 @@ const search = ref("");
 const stationOne = ref<Node | null>(null);
 const stationTwo = ref<Node | null>(null);
 const stationsSelected = computed(() => stationOne.value && stationTwo.value);
+const shorterPath = ref<PathType | null>(null);
 
 onMounted(async () => {
   isLoading.value = false;
@@ -52,6 +53,17 @@ watch(stationsSelected, (value) => {
     );
   }
 });
+
+watch(stationsSelected, (value) => {
+  if (value) {
+    const path = dataService.findPath(
+      stationOne.value!.id,
+      stationTwo.value!.id
+    );
+    shorterPath.value = path;
+    graphService.highlightPath(path);
+  }
+});
 </script>
 
 <template>
@@ -60,6 +72,7 @@ watch(stationsSelected, (value) => {
       <SidePanel
         @select-start="selectStart"
         @select-end="selectEnd"
+        :path="shorterPath"
       />
       <div
         class="block h-full w-full"
