@@ -102,7 +102,7 @@ const onEndStationSelected = (station: Node) => {
 
           <StepperTrigger as-child class="pointer-events-none">
             <div
-              class="z-10 rounded-[100%] size-9"
+              class="z-10 rounded-full size-9"
               :style="{
                 backgroundColor: step.color,
               }"
