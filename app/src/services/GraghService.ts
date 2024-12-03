@@ -9,8 +9,8 @@ export class GraphService {
   private strokeWidth = 3;
   private scaleFactor = 2;
   private zoomBehavior: d3.ZoomBehavior<Element, unknown>;
-  private firstStation: Node | null = null;
-  private secondStation: Node | null = null;
+  private start: Node | null = null;
+  private end: Node | null = null;
   private sidePanelSize = 350;
 
   constructor(
@@ -104,7 +104,7 @@ export class GraphService {
     this.g.attr("transform", transform.toString());
   }
 
-  public setFirstStation(stationIndex: number) {
+  public setStartStation(stationIndex: number) {
     const station = this.g.selectAll<SVGCircleElement, Node>("circle").data()[
       stationIndex
     ];
@@ -113,57 +113,55 @@ export class GraphService {
       return;
     }
 
-    this.firstStation = station;
+    this.start = station;
 
-    const zoomScale = 3;
-
-    const translateX =
-      this.window.innerWidth / 2 -
-      station.x * this.scaleFactor * zoomScale -
-      this.sidePanelSize / 2;
-    const translateY =
-      this.window.innerHeight / 2 - station.y * this.scaleFactor * zoomScale;
-
-    const transform = d3.zoomIdentity
-      .translate(translateX, translateY)
-      .scale(zoomScale);
-
-    this.svg.transition().duration(750).call(
-      // @ts-ignore
-      this.zoomBehavior.transform,
-      transform
-    );
+    this.center();
 
     this.g
       .selectAll<SVGCircleElement, Node>("circle")
       .transition()
       .duration(500)
-      .attr("r", (_, i) => (i === stationIndex ? this.radius * 2 : this.radius))
-      .attr("fill", (d, i) => (i === stationIndex ? "red" : d.color));
+      .attr("r", (_, i) =>
+        i === this.end?.id || i === stationIndex ? this.radius * 2 : this.radius
+      )
+      .attr("fill", (d, i) =>
+        i === this.end?.id || i === stationIndex ? "red" : d.color
+      );
   }
 
-  public setSecondStation(stationIndex: number) {
-    const secondStation = this.g
+  public setEndStation(stationIndex: number) {
+    const endStation = this.g
       .selectAll<SVGCircleElement, Node>("circle")
       .data()[stationIndex];
-    if (!secondStation) {
+    if (!endStation) {
       console.error("Second station not found");
       return;
     }
 
-    if (!this.firstStation) {
-      console.error("First station must be set before second station");
-      return;
-    }
+    this.end = endStation;
 
-    this.secondStation = secondStation;
+    this.center();
 
-    const centerX = (this.firstStation.x + secondStation.x) / 2;
-    const centerY = (this.firstStation.y + secondStation.y) / 2;
+    this.g
+      .selectAll<SVGCircleElement, Node>("circle")
+      .transition()
+      .duration(500)
+      .attr("r", (_, i) =>
+        i === this.start?.id || i === stationIndex
+          ? this.radius * 2
+          : this.radius
+      )
+      .attr("fill", (d, i) =>
+        i === this.start?.id || i === stationIndex ? "red" : d.color
+      );
+  }
+
+  private centerBetweenStations(start: Node, end: Node) {
+    const centerX = (start.x + end.x) / 2;
+    const centerY = (start.y + end.y) / 2;
 
     const distance = Math.sqrt(
-      Math.pow(secondStation.x - this.firstStation.x, 2) +
-        Math.pow(secondStation.y - this.firstStation.y, 2)
+      Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2)
     );
 
     const zoomFactor = Math.min(
@@ -189,22 +187,44 @@ export class GraphService {
       this.zoomBehavior.transform,
       transform
     );
-
-    this.g
-      .selectAll<SVGCircleElement, Node>("circle")
-      .transition()
-      .duration(500)
-      .attr("r", (_, i) =>
-        i === this.firstStation?.id || i === stationIndex
-          ? this.radius * 2
-          : this.radius
-      )
-      .attr("fill", (d, i) =>
-        i === this.firstStation?.id || i === stationIndex ? "red" : d.color
-      );
   }
 
-  public getG() {
-    return this.g;
+  private centerOnStation(station: Node) {
+    const zoomScale = 3;
+
+    const translateX =
+      this.window.innerWidth / 2 -
+      station.x * this.scaleFactor * zoomScale -
+      this.sidePanelSize / 2;
+    const translateY =
+      this.window.innerHeight / 2 - station.y * this.scaleFactor * zoomScale;
+
+    const transform = d3.zoomIdentity
+      .translate(translateX, translateY)
+      .scale(zoomScale);
+
+    this.svg.transition().duration(750).call(
+      // @ts-ignore
+      this.zoomBehavior.transform,
+      transform
+    );
+  }
+
+  private center() {
+    if (!this.start && this.end) {
+      this.centerOnStation(this.end);
+      return;
+    }
+    if (this.start && !this.end) {
+      this.centerOnStation(this.start);
+      return;
+    }
+    if (this.start && this.end && this.start === this.end) {
+      this.centerOnStation(this.start);
+      return;
+    }
+    if (this.start && this.end) {
+      this.centerBetweenStations(this.start, this.end);
+    }
   }
 }

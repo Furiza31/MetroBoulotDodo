@@ -19,11 +19,11 @@ const onStationClick = (station: Node) => {
 
 <template>
   <Card class="w-full">
-    <CardHeader>
+    <CardHeader class="p-3">
       <CardTitle>Search result</CardTitle>
     </CardHeader>
     <CardContent
-      class="flex flex-col justify-start items-center gap-2"
+      class="flex flex-col justify-start items-center gap-2 p-3 pt-0"
       v-if="searchResult.length > 0"
     >
       <Button
@@ -48,7 +48,7 @@ const onStationClick = (station: Node) => {
         </span>
       </Button>
     </CardContent>
-    <CardContent v-else>
+    <CardContent v-else class="p-3 pt-0">
       <p>No result found</p>
     </CardContent>
   </Card>

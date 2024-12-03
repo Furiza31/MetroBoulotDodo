@@ -5,29 +5,29 @@ import { Ref, ref, watch } from "vue";
 import SearchInput from "./SearchInput.vue";
 import SearchResult from "./SearchResult.vue";
 
-const searchInputFirstStation = ref("");
-const searchResultFirstStation: Ref<Node[]> = ref([]);
-const searchInputSecondStation = ref("");
-const searchResultSecondStation: Ref<Node[]> = ref([]);
+const searchInputStartStation = ref("");
+const searchResultStartStation: Ref<Node[]> = ref([]);
+const searchInputEndStation = ref("");
+const searchResultEndStation: Ref<Node[]> = ref([]);
 
-watch(searchInputFirstStation, (value) => {
-  searchResultFirstStation.value = dataService.searchStation(value);
+watch(searchInputStartStation, (value) => {
+  searchResultStartStation.value = dataService.searchStation(value);
 });
 
-watch(searchInputSecondStation, (value) => {
-  searchResultSecondStation.value = dataService.searchStation(value);
+watch(searchInputEndStation, (value) => {
+  searchResultEndStation.value = dataService.searchStation(value);
 });
 
-const emits = defineEmits(["select-first-station", "select-second-station"]);
+const emits = defineEmits(["select-start", "select-end"]);
 
-const onFirstStationSelected = (station: Node) => {
-  searchInputFirstStation.value = station.name;
-  emits("select-first-station", station);
+const onStartStationSelected = (station: Node) => {
+  searchInputStartStation.value = station.name;
+  emits("select-start", station);
 };
 
-const onSecondStationSelected = (station: Node) => {
-  searchInputSecondStation.value = station.name;
-  emits("select-second-station", station);
+const onEndStationSelected = (station: Node) => {
+  searchInputEndStation.value = station.name;
+  emits("select-end", station);
 };
 </script>
 
@@ -36,20 +36,20 @@ const onSecondStationSelected = (station: Node) => {
     class="w-[350px] min-w-[350px] bg-white relative p-3 panel duration-300 flex flex-col gap-3 justify-start items-start"
   >
     <SearchInput
-      v-model="searchInputFirstStation"
-      placeholder="Search first station"
+      v-model="searchInputStartStation"
+      placeholder="Search start station"
     />
     <SearchResult
-      :searchResult="searchResultFirstStation"
-      @select-station="onFirstStationSelected"
+      :searchResult="searchResultStartStation"
+      @select-station="onStartStationSelected"
     />
     <SearchInput
-      v-model="searchInputSecondStation"
-      placeholder="Search second station"
+      v-model="searchInputEndStation"
+      placeholder="Search end station"
     />
     <SearchResult
-      :searchResult="searchResultSecondStation"
-      @select-station="onSecondStationSelected"
+      :searchResult="searchResultEndStation"
+      @select-station="onEndStationSelected"
     />
   </section>
 </template>

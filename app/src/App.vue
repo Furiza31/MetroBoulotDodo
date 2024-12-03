@@ -35,14 +35,14 @@ watch(search, (value) => {
   console.log(value);
 });
 
-const selectFirstStation = (station: Node) => {
+const selectStart = (station: Node) => {
   stationOne.value = station;
-  graphService.setFirstStation(station.id);
+  graphService.setStartStation(station.id);
 };
 
-const selectSecondStation = (station: Node) => {
+const selectEnd = (station: Node) => {
   stationTwo.value = station;
-  graphService.setSecondStation(station.id);
+  graphService.setEndStation(station.id);
 };
 
 watch(stationsSelected, (value) => {
@@ -58,8 +58,8 @@ watch(stationsSelected, (value) => {
   <main class="relative block h-screen w-screen">
     <div v-if="!isLoading" class="relative h-screen w-screen flex flex-row">
       <SidePanel
-        @select-first-station="selectFirstStation"
-        @select-second-station="selectSecondStation"
+        @select-start="selectStart"
+        @select-end="selectEnd"
       />
       <div
         class="block h-full w-full"
