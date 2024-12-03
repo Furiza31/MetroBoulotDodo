@@ -6,18 +6,25 @@ import {
 } from "src/types/MetroDataType";
 
 class DataService {
-  private static instance: DataService; // Static instance of the class
+  private static instance: DataService;
   private datas: MetroDataType;
   private lines: LineType[];
   private maxSearchResults = 10;
 
-  // Private constructor to prevent instantiation from outside
+  /**
+   * Singleton class
+   * @private
+   * @constructor
+   */
   private constructor() {
     this.datas = { nodes: [] };
     this.lines = [];
   }
 
-  // Static method to get the singleton instance
+  /**
+   * Get the instance of the DataService
+   * @returns {DataService} The instance of the DataService
+   */
   public static getInstance(): DataService {
     if (!DataService.instance) {
       DataService.instance = new DataService();
@@ -25,6 +32,10 @@ class DataService {
     return DataService.instance;
   }
 
+  /**
+   * Get the subway data
+   * @returns {Promise<MetroDataType>} The subway data
+   */
   public async getSubwayData(): Promise<MetroDataType> {
     if (this.datas.nodes.length > 0) {
       return this.datas;
@@ -34,6 +45,10 @@ class DataService {
     return this.datas;
   }
 
+  /**
+   * Get the subway lines
+   * @returns {Promise<LineType[]>} The subway lines
+   */
   public async getSubwayLines(): Promise<LineType[]> {
     if (this.lines.length > 0) {
       return this.lines;
@@ -68,6 +83,11 @@ class DataService {
     return this.lines;
   }
 
+  /**
+   * Get the coordinates of a node
+   * @param id The id of the node
+   * @returns {number[] | null} The coordinates of the node
+   */
   private getNodeCoords(id: number) {
     const node = this.datas.nodes.find((n) => n.id === id);
     if (node) {
@@ -76,6 +96,11 @@ class DataService {
     return null;
   }
 
+  /**
+   * Search for a station
+   * @param search The search string
+   * @returns {Node[]} The stations found
+   */
   public searchStation(search: string): Node[] {
     if (this.datas.nodes.length === 0) {
       return [];
@@ -89,6 +114,12 @@ class DataService {
     return nodes.slice(0, this.maxSearchResults);
   }
 
+  /**
+   * Get shortest path between two stations using Dijkstra algorithm
+   * @param start The id of the start station
+   * @param end The id of the end station
+   * @returns {PathType} The path between the two stations
+   */
   public findPath(start: number, end: number): PathType {
     // exmple complexe de la destination entre Europe et Monceau avec un changement à Villiers
     return {

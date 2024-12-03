@@ -18,6 +18,13 @@ export class GraphService {
   private end: Node | null = null;
   private sidePanelSize = 350;
 
+  /**
+   * Creates an instance of GraphService.
+   * @param graphContainer  The container for the graph
+   * @param window the window object
+   * @param subway The subway data
+   * @param subwayLines The subway lines
+   */
   constructor(
     graphContainer: HTMLElement,
     window: Window,
@@ -32,6 +39,9 @@ export class GraphService {
     this.draw(subway, subwayLines);
   }
 
+  /**
+   * Initialize the graph
+   */
   private init() {
     this.svg
       .attr("width", this.window.innerWidth - this.sidePanelSize)
@@ -56,11 +66,21 @@ export class GraphService {
     this.svg.call(this.zoomBehavior);
   }
 
+  /**
+   * Draw the graph
+   * @param subway The subway data
+   * @param subwayLines The subway lines
+   * @returns {void}
+   */
   private draw(subway: MetroDataType, subwayLines: LineType[]) {
     this.drawLines(subwayLines);
     this.drawStations(subway.nodes);
   }
 
+  /**
+   * Draw the station names
+   * @param subway The subway data
+   */
   private drawStationNames(subway: MetroDataType["nodes"]) {
     this.g
       .selectAll("text")
@@ -75,6 +95,10 @@ export class GraphService {
       .attr("dominant-baseline", "middle");
   }
 
+  /**
+   * Draw the subway lines
+   * @param subwayLines The subway lines
+   */
   private drawLines(subwayLines: LineType[]) {
     const drawnLines = new Set<string>();
 
@@ -103,6 +127,10 @@ export class GraphService {
       .attr("stroke-width", this.strokeWidth);
   }
 
+  /**
+   * Draw the stations
+   * @param stationsData the stations data
+   */
   private drawStations(stationsData: MetroDataType["nodes"]) {
     const drawnCoordinates = new Set<string>();
 
@@ -131,10 +159,19 @@ export class GraphService {
     this.drawStationNames(stationsData);
   }
 
+  /**
+   * Zoom the graph
+   * @param param0 the zoom event
+   */
   private zoomed({ transform }: d3.D3ZoomEvent<SVGSVGElement, unknown>) {
     this.g.attr("transform", transform.toString());
   }
 
+  /**
+   * Set the start station
+   * @param stationId The id of the station
+   * @returns {void}
+   */
   public setStartStation(stationId: number) {
     const station = this.g
       .selectAll<SVGCircleElement, Node>("circle")
@@ -159,6 +196,11 @@ export class GraphService {
       );
   }
 
+  /**
+   * Set the end station
+   * @param stationId  The id of the station
+   * @returns {void}
+   */
   public setEndStation(stationId: number) {
     const endStation = this.g
       .selectAll<SVGCircleElement, Node>("circle")
@@ -183,6 +225,11 @@ export class GraphService {
       );
   }
 
+  /**
+   * center the graph between two stations
+   * @param start The start station
+   * @param end The end station
+   */
   private centerBetweenStations(start: Node, end: Node) {
     const centerX = (start.x + end.x) / 2;
     const centerY = (start.y + end.y) / 2;
@@ -217,6 +264,10 @@ export class GraphService {
     );
   }
 
+  /**
+   * Center the graph on a station
+   * @param station The station to center on
+   */
   private centerOnStation(station: Node) {
     const zoomScale = 2;
 
@@ -238,6 +289,9 @@ export class GraphService {
     );
   }
 
+  /**
+   * Center the graph
+   */
   private center() {
     if (!this.start && this.end) {
       this.centerOnStation(this.end);
@@ -256,6 +310,10 @@ export class GraphService {
     }
   }
 
+  /**
+   * Highlight a path
+   * @param path The path to highlight
+   */
   public highlightPath(path: PathType) {
     this.g
       .selectAll<SVGCircleElement, Node>("circle")
@@ -276,6 +334,12 @@ export class GraphService {
       );
   }
 
+  /**
+   * Check if two lines are the same
+   * @param line1 The first line
+   * @param line2 The second line
+   * @returns {boolean} Whether the lines are the same
+   */
   private isSameLine(line1: LineType, line2: LineType): boolean {
     const isDirectMatch =
       line1.coords.start.x === line2.coords.start.x &&
