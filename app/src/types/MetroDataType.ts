@@ -6,13 +6,11 @@ type Edge = {
 export type Node = {
   id: number;
   name: string;
-  line: [string];
+  line: string;
   isTerminus: boolean;
   connection: number;
   x: number;
   y: number;
-  latitude: number;
-  longitude: number;
   edges: Edge[];
   color: string;
 };

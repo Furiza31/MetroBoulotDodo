@@ -89,15 +89,107 @@ class DataService {
     end: number
   ): {
     lines: LineType[];
-    distance: number;
     nodes: Node[];
     time: number;
   } {
     return {
-      lines: [],
-      distance: 0,
-      nodes: [],
-      time: 0,
+      lines: [
+        {
+          id: `${103}_${366}`,
+          coords: {
+            start: {
+              x: 353,
+              y: 367,
+            },
+            end: {
+              x: 328,
+              y: 342,
+            },
+          },
+          color: "#66CC66",
+        },
+        {
+          id: `${366}_${204}`,
+          coords: {
+            start: {
+              x: 328,
+              y: 342,
+            },
+            end: {
+              x: 304,
+              y: 364,
+            },
+          },
+          color: "#0055FF",
+        },
+      ],
+      nodes: [
+        {
+          id: 103,
+          name: "Europe",
+          line: "3",
+          isTerminus: false,
+          connection: 0,
+          color: "#66CC66",
+          x: 353,
+          y: 367,
+          edges: [
+            {
+              to: 327,
+              time: 44,
+            },
+            {
+              to: 367,
+              time: 30,
+            },
+          ],
+        },
+        {
+          id: 366,
+          name: "Villiers",
+          line: "2",
+          isTerminus: false,
+          connection: 0,
+          color: "#0055FF",
+          x: 328,
+          y: 342,
+          edges: [
+            {
+              to: 204,
+              time: 51,
+            },
+            {
+              to: 302,
+              time: 53,
+            },
+            {
+              to: 367,
+              time: 180,
+            },
+          ],
+        },
+        {
+          id: 204,
+          name: "Monceau",
+          line: "2",
+          isTerminus: false,
+          connection: 0,
+          color: "#0055FF",
+          x: 304,
+          y: 364,
+          edges: [
+            {
+              to: 85,
+              time: 47,
+            },
+            {
+              to: 366,
+              time: 51,
+            },
+          ],
+        },
+      ],
+      time: 30 + 51,
     };
   }
 }
