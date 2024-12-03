@@ -85,7 +85,7 @@ export class GraphService {
   }
 
   private drawStations(stationsData: MetroDataType["nodes"]) {
-    const stations = this.g
+    this.g
       .selectAll("circle")
       .data(stationsData)
       .enter()
@@ -95,31 +95,9 @@ export class GraphService {
       .attr("r", this.radius)
       .attr("fill", (station) => station.color)
       .attr("stroke", "black")
-      .attr("stroke-width", 1)
-      .style("cursor", "pointer");
+      .attr("stroke-width", 1);
 
     this.drawStationNames(stationsData);
-
-    // @ts-ignore
-    this.addHoverEffects(stations);
-  }
-
-  private addHoverEffects(
-    stations: d3.Selection<SVGCircleElement, Node, SVGGElement, unknown>
-  ) {
-    stations
-      .on("mouseover", (event) => {
-        d3.select(event.currentTarget)
-          .transition()
-          .duration(200)
-          .attr("r", this.radius * 2);
-      })
-      .on("mouseout", (event) => {
-        d3.select(event.currentTarget)
-          .transition()
-          .duration(200)
-          .attr("r", this.radius);
-      });
   }
 
   private zoomed({ transform }: d3.D3ZoomEvent<SVGSVGElement, unknown>) {
@@ -224,5 +202,9 @@ export class GraphService {
       .attr("fill", (d, i) =>
         i === this.firstStation?.id || i === stationIndex ? "red" : d.color
       );
+  }
+
+  public getG() {
+    return this.g;
   }
 }

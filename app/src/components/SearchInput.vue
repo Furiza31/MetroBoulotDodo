@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-vue-next";
-import { defineEmits, defineProps, ref, watch } from "vue";
+import { ref, watch } from "vue";
 
 const props = defineProps({
   modelValue: {

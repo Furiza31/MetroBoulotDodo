@@ -43,7 +43,7 @@ class DataService {
           const end = this.getNodeCoords(edge.to);
           if (start && end) {
             this.lines.push({
-              id: node.id + edge.to,
+              id: `${node.id}_${edge.to}`,
               coords: {
                 start: {
                   x: start[0],

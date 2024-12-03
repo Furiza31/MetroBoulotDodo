@@ -92,10 +92,18 @@ export const convertMetroToJSON = (metro, positions, outputFilePath) => {
         line.match(/E (\d+) (\d+) (\d+)/);
 
       const node1 = nodeMap.get(parseInt(summitNumber1));
+      const node2 = nodeMap.get(parseInt(summitNumber2));
       if (node1) {
         node1.edges = node1.edges || [];
         node1.edges.push({
           to: parseInt(summitNumber2),
+          time: parseInt(time),
+        });
+      }
+      if (node2) {
+        node2.edges = node2.edges || [];
+        node2.edges.push({
+          to: parseInt(summitNumber1),
           time: parseInt(time),
         });
       }

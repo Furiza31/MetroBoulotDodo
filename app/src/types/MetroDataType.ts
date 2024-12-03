@@ -6,7 +6,7 @@ type Edge = {
 export type Node = {
   id: number;
   name: string;
-  line: string;
+  line: [string];
   isTerminus: boolean;
   connection: number;
   x: number;
@@ -22,7 +22,7 @@ export type MetroDataType = {
 };
 
 export type LineType = {
-  id: number;
+  id: string;
   coords: {
     start: {
       x: number;
