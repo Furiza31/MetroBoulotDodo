@@ -92,6 +92,7 @@ class DataService {
     nodes: Node[];
     time: number;
   } {
+    // exmple complexe de la destination entre Europe et Monceau avec un changement à Villiers
     return {
       lines: [
         {
