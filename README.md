@@ -29,3 +29,9 @@ An app to travel in Paris.
 - [Pretty TypeScript Errors](https://marketplace.visualstudio.com/items?itemName=yoavbls.pretty-ts-errors)
 - [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 - [Git Flow](https://marketplace.visualstudio.com/items?itemName=vector-of-bool.gitflow)
+
+## To do
+
+Go to `PROJECTFOLDER/dataToJSON` and follow the instructions in the README.md file.
+
+After that, go to `PROJECTFOLDER` and run follow the instructions in the README.md file.
