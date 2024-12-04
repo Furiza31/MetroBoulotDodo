@@ -121,107 +121,255 @@ class DataService {
    * @returns {PathType} The path between the two stations
    */
   public findPath(start: number, end: number): PathType {
+    const djik = this.dijkstra(this.getAdjacentMatrix(), start);
+    console.log(djik[1]);
+    const path = this.getPath(djik[1], start, end);
+    console.log(path);
+    return this.getPathData(path);
     // exmple complexe de la destination entre Europe et Monceau avec un changement à Villiers
+  //   return {
+  //     lines: [
+  //       {
+  //         id: `${103}_${366}`,
+  //         coords: {
+  //           start: {
+  //             x: 353,
+  //             y: 367,
+  //           },
+  //           end: {
+  //             x: 328,
+  //             y: 342,
+  //           },
+  //         },
+  //         color: "#66CC66",
+  //       },
+  //       {
+  //         id: `${366}_${204}`,
+  //         coords: {
+  //           start: {
+  //             x: 328,
+  //             y: 342,
+  //           },
+  //           end: {
+  //             x: 304,
+  //             y: 364,
+  //           },
+  //         },
+  //         color: "#0055FF",
+  //       },
+  //     ],
+  //     nodes: [
+  //       {
+  //         id: 103,
+  //         name: "Europe",
+  //         line: "3",
+  //         isTerminus: false,
+  //         connection: 0,
+  //         color: "#66CC66",
+  //         x: 353,
+  //         y: 367,
+  //         edges: [
+  //           {
+  //             to: 327,
+  //             time: 44,
+  //           },
+  //           {
+  //             to: 367,
+  //             time: 30,
+  //           },
+  //         ],
+  //       },
+  //       {
+  //         id: 366,
+  //         name: "Villiers",
+  //         line: "2",
+  //         isTerminus: false,
+  //         connection: 0,
+  //         color: "#0055FF",
+  //         x: 328,
+  //         y: 342,
+  //         edges: [
+  //           {
+  //             to: 204,
+  //             time: 51,
+  //           },
+  //           {
+  //             to: 302,
+  //             time: 53,
+  //           },
+  //           {
+  //             to: 367,
+  //             time: 180,
+  //           },
+  //         ],
+  //       },
+  //       {
+  //         id: 204,
+  //         name: "Monceau",
+  //         line: "2",
+  //         isTerminus: false,
+  //         connection: 0,
+  //         color: "#0055FF",
+  //         x: 304,
+  //         y: 364,
+  //         edges: [
+  //           {
+  //             to: 85,
+  //             time: 47,
+  //           },
+  //           {
+  //             to: 366,
+  //             time: 51,
+  //           },
+  //         ],
+  //       },
+  //     ],
+  //     time: 30 + 51,
+  //   };
+  }
+
+  /**
+   * Get adjacent matrix of node data
+   * @returns {number[][]} adjacent matrix
+   */
+  public getAdjacentMatrix(): number[][] {
+    const nodes = this.datas.nodes;
+    const matrix = Array.from({ length: nodes.length }, () =>
+      Array.from({ length: nodes.length }, () => Infinity)
+    );
+
+    nodes.forEach((node) => {
+      node.edges.forEach((edge) => {
+        matrix[node.id][edge.to] = edge.time;
+      });
+    });
+    return matrix;
+  }
+
+  /**
+   * Dijkstra algorithm
+   * @param adjacentMatrix adjacent matrix
+   * @param startNode start node
+   * @returns {(number[], number[])} distance and previous arrays
+   */
+  public dijkstra(adjacentMatrix: number[][], startNode: number): [number[], number[]]{
+    const numNodes = adjacentMatrix.length;
+    const distances = Array(numNodes).fill(Infinity); // Initialiser les distances
+    const visited = Array(numNodes).fill(false);
+    const previous = Array(numNodes).fill(null);
+    distances[startNode] = 0; // Distance au point de départ 0
+
+    for (let i = 0; i < numNodes - 1; i++) {
+      const current = this.minDistance(distances, visited);
+      visited[current] = true;
+      for (let next = 0; next < numNodes; next++) {
+        const edge = adjacentMatrix[current][next];
+        const newDistance = distances[current] + edge;
+
+        if (!visited[next] && edge !== Infinity && newDistance < distances[next]) {
+          distances[next] = newDistance;
+          previous[next] = current;
+        }
+      }
+    }
+
+    return [ distances, previous ];
+  }
+
+
+  /**
+   * Find the node with the minimum distance
+   * @param distance distance array
+   * @param visited visited array
+   * @returns {number} the node with the minimum distance
+   */
+  private minDistance(distance: number[], visited: boolean[]): number {
+    let min = Infinity;
+    let minIndex = -1;
+
+    distance.forEach((value, index) => {
+      if (!visited[index] && value <= min) {
+        min = value;
+        minIndex = index;
+      }
+    });
+
+    return minIndex;
+  }
+
+  /**
+   * Get the path between two nodes
+   * @param previous previous array
+   * @param start start node
+   * @param end end node
+   * @returns {number[]} the path between two nodes
+   */
+  public getPath(previous: number[], start: number, end: number): number[] {
+    const path = [];
+    let current = end;
+    while (current !== start) {
+      path.unshift(current);
+      current = previous[current];
+    }
+    path.unshift(start);
+
+    return path;
+  }
+  /**
+   * Get tab with name of the stations between two nodes
+   * @param path path between two nodes
+   * @returns {PathType} the path between two nodes
+   */
+  public getPathData(path: number[]): PathType {
+    // Récupérer tous les nœuds du chemin
+    const nodes = path.map((nodeId) => {
+        const node = this.datas.nodes.find((n) => n.id === nodeId);
+        if (!node) {
+            throw new Error(`Node with ID ${nodeId} not found in metro data`);
+        }
+        return node;
+    });
+
+    // Construire les lignes en utilisant les coordonnées des nœuds
+    const lines: LineType[] = [];
+    let totalTime = 0;
+
+    for (let i = 0; i < path.length - 1; i++) {
+        const startNode = nodes[i];
+        const endNode = nodes[i + 1];
+
+        // Trouver l'arête reliant les deux nœuds
+        const edge = startNode.edges.find((e) => e.to === endNode.id);
+        if (!edge) {
+            throw new Error(`No edge found between ${startNode.id} and ${endNode.id}`);
+        }
+
+        // Ajouter la ligne correspondante
+        lines.push({
+            id: `${startNode.id}_${endNode.id}`,
+            coords: {
+                start: {
+                    x: startNode.x,
+                    y: startNode.y,
+                },
+                end: {
+                    x: endNode.x,
+                    y: endNode.y,
+                },
+            },
+            color: startNode.color, // Utiliser la couleur du nœud de départ
+        });
+
+        // Ajouter le temps de l'arête au temps total
+        totalTime += edge.time;
+    }
+
+    // Construire le PathType final
     return {
-      lines: [
-        {
-          id: `${103}_${366}`,
-          coords: {
-            start: {
-              x: 353,
-              y: 367,
-            },
-            end: {
-              x: 328,
-              y: 342,
-            },
-          },
-          color: "#66CC66",
-        },
-        {
-          id: `${366}_${204}`,
-          coords: {
-            start: {
-              x: 328,
-              y: 342,
-            },
-            end: {
-              x: 304,
-              y: 364,
-            },
-          },
-          color: "#0055FF",
-        },
-      ],
-      nodes: [
-        {
-          id: 103,
-          name: "Europe",
-          line: "3",
-          isTerminus: false,
-          connection: 0,
-          color: "#66CC66",
-          x: 353,
-          y: 367,
-          edges: [
-            {
-              to: 327,
-              time: 44,
-            },
-            {
-              to: 367,
-              time: 30,
-            },
-          ],
-        },
-        {
-          id: 366,
-          name: "Villiers",
-          line: "2",
-          isTerminus: false,
-          connection: 0,
-          color: "#0055FF",
-          x: 328,
-          y: 342,
-          edges: [
-            {
-              to: 204,
-              time: 51,
-            },
-            {
-              to: 302,
-              time: 53,
-            },
-            {
-              to: 367,
-              time: 180,
-            },
-          ],
-        },
-        {
-          id: 204,
-          name: "Monceau",
-          line: "2",
-          isTerminus: false,
-          connection: 0,
-          color: "#0055FF",
-          x: 304,
-          y: 364,
-          edges: [
-            {
-              to: 85,
-              time: 47,
-            },
-            {
-              to: 366,
-              time: 51,
-            },
-          ],
-        },
-      ],
-      time: 30 + 51,
+        nodes,
+        lines,
+        time: totalTime,
     };
   }
 }
-
 export const dataService = DataService.getInstance();
