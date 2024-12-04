@@ -242,7 +242,7 @@ export class GraphService {
       Math.min(
         this.window.innerWidth / (distance * this.scaleFactor),
         this.window.innerHeight / (distance * this.scaleFactor)
-      ) - 7;
+      ) - 6;
 
     const zoomScale = Math.max(1, zoomFactor);
 
@@ -313,14 +313,15 @@ export class GraphService {
   /**
    * Highlight a path
    * @param path The path to highlight
+   * @param color The color to highlight the path
    */
-  public highlightPath(path: PathType) {
+  public highlightPath(path: PathType, color: "red") {
     this.g
       .selectAll<SVGCircleElement, Node>("circle")
       .transition()
       .duration(500)
       .attr("fill", (d) =>
-        path.nodes.some((node) => node.id === d.id) ? "red" : d.color
+        path.nodes.some((node) => node.id === d.id) ? color : d.color
       );
 
     this.g
@@ -329,7 +330,7 @@ export class GraphService {
       .duration(500)
       .attr("stroke", (line) =>
         path.lines.some((pathLine) => this.isSameLine(pathLine, line))
-          ? "red"
+          ? color
           : line.color
       );
   }

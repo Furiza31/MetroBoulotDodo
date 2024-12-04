@@ -61,7 +61,7 @@ watch(stationsSelected, (value) => {
       stationTwo.value!.id
     );
     shorterPath.value = path;
-    graphService.highlightPath(path);
+    graphService.highlightPath(path, "red");
   }
 });
 </script>
