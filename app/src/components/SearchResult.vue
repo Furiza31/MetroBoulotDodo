@@ -23,7 +23,7 @@ const onStationClick = (station: Node) => {
       <CardTitle>Search result</CardTitle>
     </CardHeader>
     <CardContent
-      class="flex flex-col justify-start items-center gap-2 p-3 pt-0"
+      class="flex flex-col justify-start items-center gap-2 p-3 pt-0 max-h-60 overflow-y-auto"
       v-if="searchResult.length > 0"
     >
       <Button

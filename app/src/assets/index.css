@@ -76,6 +76,22 @@
     @apply bg-background text-foreground;
   }
 
+  ::-webkit-scrollbar {
+    width: 7px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: grey;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: black;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
   html,
   body {
     margin: 0;

@@ -13,7 +13,7 @@ import {
   StepperTitle,
   StepperTrigger,
 } from "@/components/ui/stepper";
-import { Minus, SquareM } from "lucide-vue-next";
+import { Circle, Minus, SquareM } from "lucide-vue-next";
 
 const searchInputStartStation = ref("");
 const searchResultStartStation: Ref<Node[]> = ref([]);
@@ -82,11 +82,11 @@ const onEndStationSelected = (station: Node) => {
       :searchResult="searchResultEndStation"
       @select-station="onEndStationSelected"
     />
-    <div class="overflow-y-auto w-full h-full">
+    <div class="overflow-y-auto w-full h-full" v-if="steps">
       <Stepper
         orientation="vertical"
         class="mx-auto flex w-full max-w-md flex-col justify-start gap-10"
-        :default-value="3"
+        :default-value="steps?.length"
       >
         <StepperItem
           v-for="step in steps"
@@ -132,7 +132,8 @@ const onEndStationSelected = (station: Node) => {
                 :class="{ 'text-destructive': step.lineChange }"
               >
                 <Minus />
-                Ligne {{ step.line }}
+                <span v-if="step.lineChange">Changement de ligne</span>
+                <span v-else>Linge</span> {{ step.line }}
               </span>
             </StepperDescription>
           </div>

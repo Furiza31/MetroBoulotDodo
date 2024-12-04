@@ -32,25 +32,19 @@ onMounted(async () => {
   );
 });
 
-watch(search, (value) => {
-  console.log(value);
-});
-
 const selectStart = (station: Node) => {
   stationOne.value = station;
-  graphService.setStartStation(station.id);
+  graphService.setStartStation(station);
 };
 
 const selectEnd = (station: Node) => {
   stationTwo.value = station;
-  graphService.setEndStation(station.id);
+  graphService.setEndStation(station);
 };
 
 watch(stationsSelected, (value) => {
   if (value) {
-    console.log(
-      dataService.findPath(stationOne.value!.id, stationTwo.value!.id)
-    );
+    dataService.findPath(stationOne.value!.id, stationTwo.value!.id);
   }
 });
 

@@ -172,11 +172,11 @@ export class GraphService {
    * @param stationId The id of the station
    * @returns {void}
    */
-  public setStartStation(stationId: number) {
+  public setStartStation(node: Node) {
     const station = this.g
       .selectAll<SVGCircleElement, Node>("circle")
       .data()
-      .find((d) => d.id === stationId);
+      .find((d) => this.isSameNode(d, node));
 
     if (!station) {
       console.error("Station not found");
@@ -192,7 +192,7 @@ export class GraphService {
       .transition()
       .duration(500)
       .attr("fill", (d) =>
-        d.id === this.end?.id || d.id === stationId ? "red" : d.color
+        d.id === this.start?.id || this.isSameNode(d, node) ? "red" : d.color
       );
   }
 
@@ -201,11 +201,11 @@ export class GraphService {
    * @param stationId  The id of the station
    * @returns {void}
    */
-  public setEndStation(stationId: number) {
+  public setEndStation(node: Node) {
     const endStation = this.g
       .selectAll<SVGCircleElement, Node>("circle")
       .data()
-      .find((d) => d.id === stationId);
+      .find((d) => this.isSameNode(d, node));
 
     if (!endStation) {
       console.error("Station not found");
@@ -221,7 +221,7 @@ export class GraphService {
       .transition()
       .duration(500)
       .attr("fill", (d) =>
-        d.id === this.start?.id || d.id === stationId ? "red" : d.color
+        d.id === this.start?.id || this.isSameNode(d, node) ? "red" : d.color
       );
   }
 
@@ -321,7 +321,7 @@ export class GraphService {
       .transition()
       .duration(500)
       .attr("fill", (d) =>
-        path.nodes.some((node) => node.id === d.id) ? color : d.color
+        path.nodes.some((node) => this.isSameNode(node, d)) ? color : d.color
       );
 
     this.g
@@ -333,6 +333,10 @@ export class GraphService {
           ? color
           : line.color
       );
+  }
+
+  private isSameNode(node1: Node, node2: Node): boolean {
+    return node1.x === node2.x && node1.y === node2.y;
   }
 
   /**
