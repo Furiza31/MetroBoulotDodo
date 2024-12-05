@@ -13,13 +13,11 @@ let subway: MetroDataType = {
 let subwayLines: LineType[] = [];
 const graphContainer = ref(null);
 let graphService: GraphService;
-const search = ref("");
 const stationOne = ref<Node | null>(null);
 const stationTwo = ref<Node | null>(null);
-const stationTree = ref<Node | null>(null);
 const stationsSelected = computed(() => stationOne.value && stationTwo.value);
-const paris_tour_selected  =  computed(() => stationTree.value);
 const shorterPath = ref<PathType | null>(null);
+const acpmPath = ref<PathType | null>(null);
 
 onMounted(async () => {
   isLoading.value = false;
@@ -43,31 +41,27 @@ const selectEnd = (station: Node) => {
   stationTwo.value = station;
   graphService.setEndStation(station);
 };
-const selectTour = (station: Node) => {
-  stationTree.value = station;
-  graphService.setEndStation(station);
+const selectTour = () => {
+  const path = dataService.getMinimumSpanningTree();
+  acpmPath.value = path;
+  graphService.highlightPath(path, "red");
 };
 
-watch(stationsSelected, (value) => {
-  if (value) {
-    dataService.findPath(stationOne.value!.id, stationTwo.value!.id);
-    const path = dataService.findPath(
-      stationOne.value!.id,
-      stationTwo.value!.id
-    );
-    shorterPath.value = path;
-    graphService.highlightPath(path, "red");
-  }
-}, { immediate: true });
-
-watch(paris_tour_selected, (value) => {
-  if (value) {
-    dataService.getMinimumSpanningTree();
-    const path = dataService.getMinimumSpanningTree();
-    graphService.highlightPath(path, "red");
-  }
-});
-
+watch(
+  stationsSelected,
+  (value) => {
+    if (value) {
+      dataService.findPath(stationOne.value!.id, stationTwo.value!.id);
+      const path = dataService.findPath(
+        stationOne.value!.id,
+        stationTwo.value!.id
+      );
+      shorterPath.value = path;
+      graphService.highlightPath(path, "red");
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -77,7 +71,8 @@ watch(paris_tour_selected, (value) => {
         @select-start="selectStart"
         @select-end="selectEnd"
         @select-mst-start="selectTour"
-        :path="shorterPath"
+        :shorterPath="shorterPath"
+        :acpmPath="acpmPath"
       />
       <div
         class="block h-full w-full"

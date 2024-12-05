@@ -123,115 +123,13 @@ class DataService {
     const djik = this.dijkstra(this.getAdjacentMatrix(), start);
     const path = this.getPath(djik[1], start, end);
     return this.getPathData(path);
-    // exmple complexe de la destination entre Europe et Monceau avec un changement à Villiers
-    //   return {
-    //     lines: [
-    //       {
-    //         id: `${103}_${366}`,
-    //         coords: {
-    //           start: {
-    //             x: 353,
-    //             y: 367,
-    //           },
-    //           end: {
-    //             x: 328,
-    //             y: 342,
-    //           },
-    //         },
-    //         color: "#66CC66",
-    //       },
-    //       {
-    //         id: `${366}_${204}`,
-    //         coords: {
-    //           start: {
-    //             x: 328,
-    //             y: 342,
-    //           },
-    //           end: {
-    //             x: 304,
-    //             y: 364,
-    //           },
-    //         },
-    //         color: "#0055FF",
-    //       },
-    //     ],
-    //     nodes: [
-    //       {
-    //         id: 103,
-    //         name: "Europe",
-    //         line: "3",
-    //         isTerminus: false,
-    //         connection: 0,
-    //         color: "#66CC66",
-    //         x: 353,
-    //         y: 367,
-    //         edges: [
-    //           {
-    //             to: 327,
-    //             time: 44,
-    //           },
-    //           {
-    //             to: 367,
-    //             time: 30,
-    //           },
-    //         ],
-    //       },
-    //       {
-    //         id: 366,
-    //         name: "Villiers",
-    //         line: "2",
-    //         isTerminus: false,
-    //         connection: 0,
-    //         color: "#0055FF",
-    //         x: 328,
-    //         y: 342,
-    //         edges: [
-    //           {
-    //             to: 204,
-    //             time: 51,
-    //           },
-    //           {
-    //             to: 302,
-    //             time: 53,
-    //           },
-    //           {
-    //             to: 367,
-    //             time: 180,
-    //           },
-    //         ],
-    //       },
-    //       {
-    //         id: 204,
-    //         name: "Monceau",
-    //         line: "2",
-    //         isTerminus: false,
-    //         connection: 0,
-    //         color: "#0055FF",
-    //         x: 304,
-    //         y: 364,
-    //         edges: [
-    //           {
-    //             to: 85,
-    //             time: 47,
-    //           },
-    //           {
-    //             to: 366,
-    //             time: 51,
-    //           },
-    //         ],
-    //       },
-    //     ],
-    //     time: 30 + 51,
-    //   };
   }
 
-
-
   /*
-    * Function that returns the minimum spanning tree of the metro network
-    * @param start The id of the start station
-    * @returns {PathType} The minimum spanning tree of the metro network
-  */
+   * Function that returns the minimum spanning tree of the metro network
+   * @param start The id of the start station
+   * @returns {PathType} The minimum spanning tree of the metro network
+   */
   public getMinimumSpanningTree(): PathType {
     return this.kruskal(this.datas.nodes);
   }
@@ -400,18 +298,18 @@ class DataService {
    * @returns {PathType} Minimum Spanning Tree path
    */
 
-  private kruskal(Nodes : Node[] ): PathType {
+  private kruskal(Nodes: Node[]): PathType {
     // Prepare data structures
     const nodes = Nodes;
-    const edges: {from: number, to: number, time: number}[] = [];
+    const edges: { from: number; to: number; time: number }[] = [];
 
     // Extract all edges from the adjacent matrix
     nodes.forEach((node, fromIndex) => {
-      node.edges.forEach(edge => {
+      node.edges.forEach((edge) => {
         edges.push({
           from: fromIndex,
           to: edge.to,
-          time: edge.time
+          time: edge.time,
         });
       });
     });
@@ -438,7 +336,7 @@ class DataService {
     };
 
     // Kruskal's algorithm to find MST
-    const mstEdges: {from: number, to: number, time: number}[] = [];
+    const mstEdges: { from: number; to: number; time: number }[] = [];
     let totalTime = 0;
 
     for (const edge of edges) {
@@ -455,14 +353,14 @@ class DataService {
 
     for (const edge of mstEdges) {
       if (!visitedNodes.has(edge.from)) {
-        const fromNode = nodes.find(n => n.id === nodes[edge.from].id);
+        const fromNode = nodes.find((n) => n.id === nodes[edge.from].id);
         if (fromNode) {
           mstNodes.push(fromNode);
           visitedNodes.add(edge.from);
         }
       }
       if (!visitedNodes.has(edge.to)) {
-        const toNode = nodes.find(n => n.id === nodes[edge.to].id);
+        const toNode = nodes.find((n) => n.id === nodes[edge.to].id);
         if (toNode) {
           mstNodes.push(toNode);
           visitedNodes.add(edge.to);
@@ -477,10 +375,10 @@ class DataService {
     return {
       nodes: mstNodes,
       lines: mstLines,
-      time: totalTime
+      time: totalTime,
     };
   }
 
-
+  private insertNodeAtTimeZero(path: PathType, firstNode: Node) {}
 }
 export const dataService = DataService.getInstance();
