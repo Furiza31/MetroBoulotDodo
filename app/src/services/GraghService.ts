@@ -154,7 +154,8 @@ export class GraphService {
       .attr("fill", (station) => station.color)
       .attr("stroke", "black")
       .attr("stroke-width", 1)
-      .attr("data-id", (station) => station.id);
+      .attr("data-id", (station) => station.id)
+      .attr("style", "cursor: pointer");
 
     this.drawStationNames(stationsData);
   }
@@ -359,5 +360,23 @@ export class GraphService {
       line1.coords.end.y === line2.coords.start.y;
 
     return isDirectMatch || isReverseMatch;
+  }
+
+  public getG() {
+    return this.g;
+  }
+
+  public cleanPath() {
+    this.g
+      .selectAll<SVGCircleElement, Node>("circle")
+      .transition()
+      .duration(500)
+      .attr("fill", (d) => d.color);
+
+    this.g
+      .selectAll<SVGLineElement, LineType>("line")
+      .transition()
+      .duration(500)
+      .attr("stroke", (line) => line.color);
   }
 }

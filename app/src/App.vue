@@ -29,6 +29,22 @@ onMounted(async () => {
     subway,
     subwayLines
   );
+
+  graphService
+    .getG()
+    .selectAll<SVGCircleElement, Node>("circle")
+    .on("click", (event, node) => {
+      if (stationOne.value && stationTwo.value) {
+        stationOne.value = null;
+        stationTwo.value = null;
+        graphService.cleanPath();
+      }
+      if (!stationOne.value) {
+        selectStart(node);
+      } else if (!stationTwo.value) {
+        selectEnd(node);
+      }
+    });
 });
 
 const selectStart = (station: Node) => {
