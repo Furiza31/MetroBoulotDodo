@@ -225,6 +225,17 @@ class DataService {
     //   };
   }
 
+
+
+  /*
+    * Function that returns the minimum spanning tree of the metro network
+    * @param start The id of the start station
+    * @returns {PathType} The minimum spanning tree of the metro network
+  */
+  public getMinimumSpanningTree(): PathType {
+    return this.kruskal(this.datas.nodes);
+  }
+
   /**
    * Get adjacent matrix of node data
    * @returns {number[][]} adjacent matrix
@@ -380,5 +391,96 @@ class DataService {
       color: start.color,
     };
   }
+
+  /* KRUSKAL function that   returns PathType that takes a  adjacentMatrix and a starting node to get a pathtype to passe by  all the nodes  */
+  /**
+   * Kruskal's algorithm to find Minimum Spanning Tree (MST)
+   * @param adjacentMatrix adjacent matrix of the metro network
+   * @param startNode starting node to anchor the algorithm
+   * @returns {PathType} Minimum Spanning Tree path
+   */
+
+  private kruskal(Nodes : Node[] ): PathType {
+    // Prepare data structures
+    const nodes = Nodes;
+    const edges: {from: number, to: number, time: number}[] = [];
+
+    // Extract all edges from the adjacent matrix
+    nodes.forEach((node, fromIndex) => {
+      node.edges.forEach(edge => {
+        edges.push({
+          from: fromIndex,
+          to: edge.to,
+          time: edge.time
+        });
+      });
+    });
+
+    // Sort edges by time (weight)
+    edges.sort((a, b) => a.time - b.time);
+
+    // Disjoint Set Union (DSU) for cycle detection
+    const parent = new Array(nodes.length).fill(0).map((_, i) => i);
+    const find = (x: number): number => {
+      if (parent[x] !== x) {
+        parent[x] = find(parent[x]);
+      }
+      return parent[x];
+    };
+    const union = (x: number, y: number) => {
+      const rootX = find(x);
+      const rootY = find(y);
+      if (rootX !== rootY) {
+        parent[rootX] = rootY;
+        return true;
+      }
+      return false;
+    };
+
+    // Kruskal's algorithm to find MST
+    const mstEdges: {from: number, to: number, time: number}[] = [];
+    let totalTime = 0;
+
+    for (const edge of edges) {
+      if (union(edge.from, edge.to)) {
+        mstEdges.push(edge);
+        totalTime += edge.time;
+      }
+    }
+
+    // Convert MST edges to nodes and lines
+    const mstNodes: Node[] = [];
+    const mstLines: LineType[] = [];
+    const visitedNodes = new Set<number>();
+
+    for (const edge of mstEdges) {
+      if (!visitedNodes.has(edge.from)) {
+        const fromNode = nodes.find(n => n.id === nodes[edge.from].id);
+        if (fromNode) {
+          mstNodes.push(fromNode);
+          visitedNodes.add(edge.from);
+        }
+      }
+      if (!visitedNodes.has(edge.to)) {
+        const toNode = nodes.find(n => n.id === nodes[edge.to].id);
+        if (toNode) {
+          mstNodes.push(toNode);
+          visitedNodes.add(edge.to);
+        }
+      }
+
+      const startNode = nodes[edge.from];
+      const endNode = nodes[edge.to];
+      mstLines.push(this.getLine(startNode, endNode));
+    }
+
+    return {
+      nodes: mstNodes,
+      lines: mstLines,
+      time: totalTime
+    };
+  }
+
+
 }
 export const dataService = DataService.getInstance();

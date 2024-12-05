@@ -18,10 +18,7 @@ const onStationClick = (station: Node) => {
 </script>
 
 <template>
-  <Card class="w-full">
-    <CardHeader class="p-3">
-      <CardTitle>Search result</CardTitle>
-    </CardHeader>
+  <Card class="w-full pt-4 border-0 bg-blue-100">
     <CardContent
       class="flex flex-col justify-start items-center gap-2 p-3 pt-0 max-h-60 overflow-y-auto"
       v-if="searchResult.length > 0"
@@ -29,7 +26,7 @@ const onStationClick = (station: Node) => {
       <Button
         v-for="station in searchResult"
         :key="station.id"
-        class="w-full justify-start flex-col gap-1 h-fit"
+        class="w-full justify-start flex-col bg-cyan-50 gap-1 h-fit"
         variant="outline"
         @click="onStationClick(station)"
         :class="{ 'bg-gray-200': selected === station.id }"

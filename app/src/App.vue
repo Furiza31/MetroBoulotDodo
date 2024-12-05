@@ -16,7 +16,9 @@ let graphService: GraphService;
 const search = ref("");
 const stationOne = ref<Node | null>(null);
 const stationTwo = ref<Node | null>(null);
+const stationTree = ref<Node | null>(null);
 const stationsSelected = computed(() => stationOne.value && stationTwo.value);
+const paris_tour_selected  =  computed(() => stationTree.value);
 const shorterPath = ref<PathType | null>(null);
 
 onMounted(async () => {
@@ -41,15 +43,14 @@ const selectEnd = (station: Node) => {
   stationTwo.value = station;
   graphService.setEndStation(station);
 };
+const selectTour = (station: Node) => {
+  stationTree.value = station;
+  graphService.setEndStation(station);
+};
 
 watch(stationsSelected, (value) => {
   if (value) {
     dataService.findPath(stationOne.value!.id, stationTwo.value!.id);
-  }
-});
-
-watch(stationsSelected, (value) => {
-  if (value) {
     const path = dataService.findPath(
       stationOne.value!.id,
       stationTwo.value!.id
@@ -57,7 +58,16 @@ watch(stationsSelected, (value) => {
     shorterPath.value = path;
     graphService.highlightPath(path, "red");
   }
+}, { immediate: true });
+
+watch(paris_tour_selected, (value) => {
+  if (value) {
+    dataService.getMinimumSpanningTree();
+    const path = dataService.getMinimumSpanningTree();
+    graphService.highlightPath(path, "red");
+  }
 });
+
 </script>
 
 <template>
@@ -66,6 +76,7 @@ watch(stationsSelected, (value) => {
       <SidePanel
         @select-start="selectStart"
         @select-end="selectEnd"
+        @select-mst-start="selectTour"
         :path="shorterPath"
       />
       <div
