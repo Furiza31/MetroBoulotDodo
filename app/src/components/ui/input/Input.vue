@@ -19,10 +19,8 @@ const modelValue = useVModel(props, "modelValue", emits, {
   defaultValue: props.defaultValue,
 });
 
-// Créer une référence pour l'élément input
 const inputRef = ref<HTMLInputElement | null>(null);
 
-// Exposer cette référence au parent
 defineExpose({
   inputRef,
 });

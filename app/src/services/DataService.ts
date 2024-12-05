@@ -100,16 +100,45 @@ class DataService {
    * @param search The search string
    * @returns {Node[]} The stations found
    */
-  public searchStation(search: string): Node[] {
+  public searchStation(search: string, isFirst: boolean): Node[] {
     if (this.datas.nodes.length === 0) {
       return [];
     }
     if (search === "") {
       return [];
     }
-    const nodes = this.datas.nodes.filter((node) =>
+
+    let nodes = this.datas.nodes.filter((node) =>
       node.name.toLowerCase().includes(search.toLowerCase())
     );
+
+    if (!isFirst) return nodes;
+
+    const processedStations = new Set<string>();
+    const nodesWithFictiveStations: Node[] = [];
+
+    nodes.forEach((node) => {
+      const stationKey = `${node.x}-${node.y}`;
+
+      if (!processedStations.has(stationKey)) {
+        const sameNodeWithDifferentLine = this.datas.nodes.filter(
+          (otherNode) =>
+            otherNode.name === node.name &&
+            otherNode.x === node.x &&
+            otherNode.y === node.y &&
+            otherNode.line !== node.line
+        );
+
+        if (sameNodeWithDifferentLine.length > 0) {
+          const fictiveNode: Node = this.getNodeAtLineTimeZero(node);
+          nodesWithFictiveStations.push(fictiveNode);
+
+          processedStations.add(stationKey);
+        }
+      }
+    });
+
+    nodes = [...nodes, ...nodesWithFictiveStations];
     return nodes;
   }
 
@@ -119,10 +148,10 @@ class DataService {
    * @param end The id of the end station
    * @returns {PathType} The path between the two stations
    */
-  public findPath(start: number, end: number): PathType {
-    const djik = this.dijkstra(this.getAdjacentMatrix(), start);
+  public findPath(start: number, end: number, nodes: Node[]): PathType {
+    const djik = this.dijkstra(this.getAdjacentMatrix(nodes), start);
     const path = this.getPath(djik[1], start, end);
-    return this.getPathData(path);
+    return this.getPathData(path, nodes);
   }
 
   /*
@@ -138,8 +167,7 @@ class DataService {
    * Get adjacent matrix of node data
    * @returns {number[][]} adjacent matrix
    */
-  public getAdjacentMatrix(): number[][] {
-    const nodes = this.datas.nodes;
+  public getAdjacentMatrix(nodes: Node[]): number[][] {
     const matrix = Array.from({ length: nodes.length }, () =>
       Array.from({ length: nodes.length }, () => Infinity)
     );
@@ -232,10 +260,13 @@ class DataService {
    * @param path path between two nodes
    * @returns {PathType} the path between two nodes
    */
-  public getPathData(path: number[]): PathType {
+  public getPathData(
+    path: number[],
+    nodesWithnodeAtLineTimeZero: Node[]
+  ): PathType {
     // Récupérer tous les nœuds du chemin
     const nodes = path.map((nodeId) => {
-      const node = this.datas.nodes.find((n) => n.id === nodeId);
+      const node = nodesWithnodeAtLineTimeZero.find((n) => n.id === nodeId);
       if (!node) {
         throw new Error(`Node with ID ${nodeId} not found in metro data`);
       }
@@ -379,6 +410,35 @@ class DataService {
     };
   }
 
-  private insertNodeAtTimeZero(path: PathType, firstNode: Node) {}
+  public getNodeAtLineTimeZero(firstNode: Node) {
+    const sameNodeWithDifferentLine = this.datas.nodes.filter(
+      (node) =>
+        node.name === firstNode.name &&
+        node.x === firstNode.x &&
+        node.y === firstNode.y
+    );
+
+    const newEdges = sameNodeWithDifferentLine.map((node) => {
+      return {
+        to: node.id,
+        time: 0,
+      };
+    });
+
+    const newNode: Node = {
+      id: this.datas.nodes.length,
+      line: firstNode.line,
+      name: firstNode.name,
+      x: firstNode.x,
+      y: firstNode.y,
+      color: firstNode.color,
+      edges: newEdges,
+      connection: firstNode.connection,
+      isTerminus: firstNode.isTerminus,
+      isFictive: true,
+    };
+
+    return newNode;
+  }
 }
 export const dataService = DataService.getInstance();

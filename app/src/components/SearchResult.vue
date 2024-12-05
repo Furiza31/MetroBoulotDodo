@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import type { Node } from "@/types/MetroDataType";
 import { Minus, SquareM } from "lucide-vue-next";
 import { ref } from "vue";
@@ -20,7 +20,7 @@ const onStationClick = (station: Node) => {
 <template>
   <Card class="w-full pt-4 border-0 bg-blue-100">
     <CardContent
-      class="flex flex-col justify-start items-center gap-2 p-3 pt-0 max-h-60 overflow-y-auto"
+      class="flex flex-col justify-start items-center gap-2 p-3 pt-0 max-h-52 overflow-y-auto"
       v-if="searchResult.length > 0"
     >
       <Button
@@ -39,9 +39,17 @@ const onStationClick = (station: Node) => {
         </span>
         <span
           class="flex flex-row flex-nowrap w-full justify-start items-center gap-2"
+          v-if="!station.isFictive"
         >
           <Minus />
           Ligne {{ station.line }}
+        </span>
+        <span
+          class="flex flex-row flex-nowrap w-full justify-start items-center gap-2"
+          v-else
+        >
+          <Minus />
+          All lines
         </span>
       </Button>
     </CardContent>

@@ -50,11 +50,16 @@ const selectTour = () => {
 watch(
   stationsSelected,
   (value) => {
-    if (value) {
-      dataService.findPath(stationOne.value!.id, stationTwo.value!.id);
+    if (value && stationOne.value && stationTwo.value) {
+      const nodeAtLineTimeZero = dataService.getNodeAtLineTimeZero(
+        stationOne.value
+      );
+      const datas = [...subway.nodes];
+      datas.push(nodeAtLineTimeZero);
       const path = dataService.findPath(
-        stationOne.value!.id,
-        stationTwo.value!.id
+        nodeAtLineTimeZero.id,
+        stationTwo.value.id,
+        datas
       );
       shorterPath.value = path;
       graphService.highlightPath(path, "red");

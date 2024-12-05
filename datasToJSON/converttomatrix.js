@@ -23,23 +23,19 @@ export const converttomatrix = (graph) => {
     throw new TypeError("Invalid input: graph must have at least one node");
   }
 
-  // Find the maximum node ID to dimension the matrix
   const maxNodeId = Math.max(...nodes.map((node) => node.id));
   const matrixSize = maxNodeId + 1;
 
-  // Initialize the matrix with -1 (no connection)
   const matrix = Array.from({ length: matrixSize }, () =>
     Array(matrixSize).fill(-1)
   );
 
-  // Fill the matrix with edge data
   nodes.forEach((node) => {
     if (!node || typeof node !== "object") {
       console.error("Invalid node in graph:", node);
       throw new TypeError("Invalid node in graph");
     }
 
-    // Make sure edges exists and is an array
     const edges = node.edges || [];
     if (!Array.isArray(edges)) {
       console.error("Invalid edges for node:", node);
@@ -53,7 +49,6 @@ export const converttomatrix = (graph) => {
       }
 
       matrix[node.id][edge.to] = edge.time;
-      // For undirected graph, fill the reverse connection too
       matrix[edge.to][node.id] = edge.time;
     });
   });

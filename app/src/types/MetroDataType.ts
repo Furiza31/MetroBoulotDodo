@@ -13,6 +13,7 @@ export type Node = {
   y: number;
   edges: Edge[];
   color: string;
+  isFictive?: boolean;
 };
 
 export type MetroDataType = {

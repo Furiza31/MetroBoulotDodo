@@ -25,7 +25,9 @@ const searchResultEndStation: Ref<Node[]> = ref([]);
 const steps = computed(() =>
   props.shorterPath?.nodes.map((node, index) => {
     const lineChange =
-      index > 0 && node.line !== props.shorterPath?.nodes[index - 1].line;
+      index > 0 &&
+      node.line !== props.shorterPath?.nodes[index - 1].line &&
+      !props.shorterPath?.nodes[index - 1].isFictive;
 
     return {
       step: index + 1,
@@ -34,6 +36,7 @@ const steps = computed(() =>
       color: node.color,
       state: "completed",
       lineChange,
+      isFictive: node.isFictive ? true : false,
     };
   })
 );
@@ -48,11 +51,11 @@ const props = defineProps({
 });
 
 watch(searchInputStartStation, (value) => {
-  searchResultStartStation.value = dataService.searchStation(value);
+  searchResultStartStation.value = dataService.searchStation(value, true);
 });
 
 watch(searchInputEndStation, (value) => {
-  searchResultEndStation.value = dataService.searchStation(value);
+  searchResultEndStation.value = dataService.searchStation(value, false);
 });
 
 const emits = defineEmits(["select-start", "select-end", "select-mst-start"]);
@@ -73,7 +76,7 @@ const onMSTStationSelected = () => {
 
 <template>
   <section
-    class="w-[350px] min-w-[350px] bg-blue-100 relative p-3 panel duration-300 flex flex-col gap-3 justify-start items-start"
+    class="w-[350px] min-w-[350px] bg-blue-100 relative p-3 panel duration-300 flex flex-col gap-3 justify-start items-start overflow-y-auto"
   >
     <h1 class="text-center w-full text-xl font-bold">Metro boulot dodo</h1>
     <Tabs default-value="itineraire" class="w-full h-full">
@@ -85,7 +88,7 @@ const onMSTStationSelected = () => {
       </TabsList>
       <TabsContent value="itineraire" asChild>
         <h1 class="text-lg font-bold mb-2 flex items-center gap-2">
-          <Tree size="20" /> Trouver l'itinéraire
+          Trouver l'itinéraire
         </h1>
         <SearchInput
           v-model="searchInputStartStation"
@@ -109,7 +112,7 @@ const onMSTStationSelected = () => {
           @select-station="onEndStationSelected"
         />
 
-        <div class="overflow-y-auto w-full h-full mt-2" v-if="steps">
+        <div class="w-full h-fit mt-2" v-if="steps">
           <div v-if="props.shorterPath" class="my-1">
             Temps de parcours:
             {{ Math.round(props.shorterPath?.time / 60) }} minutes
@@ -127,11 +130,19 @@ const onMSTStationSelected = () => {
               :step="step.step"
             >
               <StepperSeparator
-                v-if="steps && step.step !== steps[steps.length - 1].step"
+                v-if="
+                  steps &&
+                  step.step !== steps[steps.length - 1].step &&
+                  step.isFictive === false
+                "
                 class="absolute left-[18px] top-[38px] block h-[105%] w-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary"
               />
 
-              <StepperTrigger as-child class="pointer-events-none">
+              <StepperTrigger
+                as-child
+                class="pointer-events-none"
+                v-if="step.isFictive === false"
+              >
                 <div
                   class="z-10 rounded-full size-9"
                   :style="{
@@ -142,7 +153,7 @@ const onMSTStationSelected = () => {
                 </div>
               </StepperTrigger>
 
-              <div class="flex flex-col gap-1">
+              <div class="flex flex-col gap-1" v-if="step.isFictive === false">
                 <StepperTitle
                   :class="[state === 'active' && 'text-primary']"
                   class="text-sm font-semibold transition lg:text-base"
@@ -174,7 +185,7 @@ const onMSTStationSelected = () => {
       </TabsContent>
       <TabsContent value="kruskal">
         <h1 class="text-lg font-bold mb-2 flex items-center gap-2">
-          <Tree size="20" /> ACPM Kruskal
+          ACPM Kruskal
         </h1>
         <Button class="w-full" @click="onMSTStationSelected">Calculer</Button>
         <div v-if="acpmPath" class="mt-1">
