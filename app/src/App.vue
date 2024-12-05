@@ -33,7 +33,7 @@ onMounted(async () => {
   graphService
     .getG()
     .selectAll<SVGCircleElement, Node>("circle")
-    .on("click", (event, node) => {
+    .on("click", (_, node) => {
       if (stationOne.value && stationTwo.value) {
         stationOne.value = null;
         stationTwo.value = null;
