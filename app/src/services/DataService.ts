@@ -191,10 +191,10 @@ class DataService {
     startNode: number
   ): [number[], number[]] {
     const numNodes = adjacentMatrix.length;
-    const distances = Array(numNodes).fill(Infinity); // Initialiser les distances
+    const distances = Array(numNodes).fill(Infinity);
     const visited = Array(numNodes).fill(false);
     const previous = Array(numNodes).fill(null);
-    distances[startNode] = 0; // Distance au point de départ 0
+    distances[startNode] = 0;
 
     for (let i = 0; i < numNodes - 1; i++) {
       const current = this.minDistance(distances, visited);
@@ -264,7 +264,6 @@ class DataService {
     path: number[],
     nodesWithnodeAtLineTimeZero: Node[]
   ): PathType {
-    // Récupérer tous les nœuds du chemin
     const nodes = path.map((nodeId) => {
       const node = nodesWithnodeAtLineTimeZero.find((n) => n.id === nodeId);
       if (!node) {
@@ -273,7 +272,6 @@ class DataService {
       return node;
     });
 
-    // Construire les lignes en utilisant les coordonnées des nœuds
     const lines: LineType[] = [];
     let totalTime = 0;
 
@@ -281,7 +279,6 @@ class DataService {
       const startNode = nodes[i];
       const endNode = nodes[i + 1];
 
-      // Trouver l'arête reliant les deux nœuds
       const edge = startNode.edges.find((e) => e.to === endNode.id);
       if (!edge) {
         throw new Error(
@@ -289,14 +286,11 @@ class DataService {
         );
       }
 
-      // Ajouter la ligne correspondante
       lines.push(this.getLine(startNode, endNode));
 
-      // Ajouter le temps de l'arête au temps total
       totalTime += edge.time;
     }
 
-    // Construire le PathType final
     return {
       nodes,
       lines,
@@ -330,11 +324,9 @@ class DataService {
    */
 
   private kruskal(Nodes: Node[]): PathType {
-    // Prepare data structures
     const nodes = Nodes;
     const edges: { from: number; to: number; time: number }[] = [];
 
-    // Extract all edges from the adjacent matrix
     nodes.forEach((node, fromIndex) => {
       node.edges.forEach((edge) => {
         edges.push({
@@ -345,10 +337,8 @@ class DataService {
       });
     });
 
-    // Sort edges by time (weight)
     edges.sort((a, b) => a.time - b.time);
 
-    // Disjoint Set Union (DSU) for cycle detection
     const parent = new Array(nodes.length).fill(0).map((_, i) => i);
     const find = (x: number): number => {
       if (parent[x] !== x) {
@@ -366,7 +356,6 @@ class DataService {
       return false;
     };
 
-    // Kruskal's algorithm to find MST
     const mstEdges: { from: number; to: number; time: number }[] = [];
     let totalTime = 0;
 
@@ -377,7 +366,6 @@ class DataService {
       }
     }
 
-    // Convert MST edges to nodes and lines
     const mstNodes: Node[] = [];
     const mstLines: LineType[] = [];
     const visitedNodes = new Set<number>();

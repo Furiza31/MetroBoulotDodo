@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { LoaderCircle } from "lucide-vue-next";
-import { computed, onMounted, ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 import SidePanel from "./components/SidePanel.vue";
 import { dataService } from "./services/DataService";
 import { GraphService } from "./services/GraghService";
@@ -15,7 +15,6 @@ const graphContainer = ref(null);
 let graphService: GraphService;
 const stationOne = ref<Node | null>(null);
 const stationTwo = ref<Node | null>(null);
-const stationsSelected = computed(() => stationOne.value && stationTwo.value);
 const shorterPath = ref<PathType | null>(null);
 const acpmPath = ref<PathType | null>(null);
 
@@ -35,11 +34,17 @@ onMounted(async () => {
 const selectStart = (station: Node) => {
   stationOne.value = station;
   graphService.setStartStation(station);
+  if (stationTwo.value) {
+    selectShortestPath();
+  }
 };
 
 const selectEnd = (station: Node) => {
   stationTwo.value = station;
   graphService.setEndStation(station);
+  if (stationOne.value) {
+    selectShortestPath();
+  }
 };
 const selectTour = () => {
   const path = dataService.getMinimumSpanningTree();
@@ -47,26 +52,22 @@ const selectTour = () => {
   graphService.highlightPath(path, "red");
 };
 
-watch(
-  stationsSelected,
-  (value) => {
-    if (value && stationOne.value && stationTwo.value) {
-      const nodeAtLineTimeZero = dataService.getNodeAtLineTimeZero(
-        stationOne.value
-      );
-      const datas = [...subway.nodes];
-      datas.push(nodeAtLineTimeZero);
-      const path = dataService.findPath(
-        nodeAtLineTimeZero.id,
-        stationTwo.value.id,
-        datas
-      );
-      shorterPath.value = path;
-      graphService.highlightPath(path, "red");
-    }
-  },
-  { immediate: true }
-);
+const selectShortestPath = () => {
+  if (stationOne.value && stationTwo.value) {
+    const nodeAtLineTimeZero = dataService.getNodeAtLineTimeZero(
+      stationOne.value
+    );
+    const datas = [...subway.nodes];
+    datas.push(nodeAtLineTimeZero);
+    const path = dataService.findPath(
+      nodeAtLineTimeZero.id,
+      stationTwo.value.id,
+      datas
+    );
+    shorterPath.value = path;
+    graphService.highlightPath(path, "red");
+  }
+};
 </script>
 
 <template>
