@@ -25,7 +25,7 @@ const onStationClick = (station: Node) => {
     >
       <Button
         v-for="station in searchResult"
-        :key="station.id"
+        :key="`${station.id}-${station.isFictive}`"
         class="w-full justify-start flex-col bg-cyan-50 gap-1 h-fit"
         variant="outline"
         @click="onStationClick(station)"
