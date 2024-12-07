@@ -5,6 +5,8 @@ import {
   PathType,
 } from "src/types/MetroDataType";
 
+
+
 class DataService {
   private static instance: DataService;
   private datas: MetroDataType;
@@ -160,9 +162,94 @@ class DataService {
    * @returns {PathType} The minimum spanning tree of the metro network
    */
   public getMinimumSpanningTree(): PathType {
-    return this.kruskal(this.datas.nodes);
+    let tree = this.display_tree(this.kruskal(this.datas.nodes));
+    return tree;
   }
 
+  public display_tree(tree: PathType): PathType {
+    // Create a graph representation to check connectivity
+    const graph = new Map<string, Set<string>>();
+    const processedPairs = new Set<string>();
+
+    // Initialize the graph with all stations
+    tree.nodes.forEach(node => {
+      const nodeKey = `${node.x},${node.y}`;
+      graph.set(nodeKey, new Set());
+    });
+
+    // Find the time for each line by comparing with original edges
+    const getLineTime = (line: LineType): number => {
+      const startNode = tree.nodes.find(
+          node => node.x === line.coords.start.x && node.y === line.coords.start.y
+      );
+      const endNode = tree.nodes.find(
+          node => node.x === line.coords.end.x && node.y === line.coords.end.y
+      );
+
+      if (!startNode || !endNode) return Infinity;
+
+      const edge = startNode.edges.find(e => {
+        const targetNode = tree.nodes.find(n => n.id === e.to);
+        return targetNode && targetNode.x === endNode.x && targetNode.y === endNode.y;
+      });
+
+      return edge?.time ?? Infinity;
+    };
+
+    // Sort lines by time
+    const sortedLines = [...tree.lines].sort((a, b) => {
+      const timeA = getLineTime(a);
+      const timeB = getLineTime(b);
+      return timeA - timeB;
+    });
+
+    // Helper function to check if adding an edge would create a cycle
+    const wouldCreateCycle = (start: string, end: string): boolean => {
+      const visited = new Set<string>();
+      const queue = [start];
+
+      while (queue.length > 0) {
+        const current = queue.shift()!;
+        if (current === end) return true;
+
+        visited.add(current);
+        for (const neighbor of graph.get(current) || []) {
+          if (!visited.has(neighbor)) {
+            queue.push(neighbor);
+          }
+        }
+      }
+      return false;
+    };
+
+    // Filter lines to create a spanning tree
+    const filteredLines = sortedLines.filter(line => {
+      const startKey = `${line.coords.start.x},${line.coords.start.y}`;
+      const endKey = `${line.coords.end.x},${line.coords.end.y}`;
+      const pairKey = [startKey, endKey].sort().join('_');
+
+      if (processedPairs.has(pairKey)) {
+        return false;
+      }
+
+      // Check if adding this line would create a cycle
+      if (wouldCreateCycle(startKey, endKey)) {
+        return false;
+      }
+
+      // Add the connection to the graph
+      graph.get(startKey)?.add(endKey);
+      graph.get(endKey)?.add(startKey);
+      processedPairs.add(pairKey);
+      return true;
+    });
+
+    return {
+      nodes: tree.nodes,
+      lines: filteredLines,
+      time: tree.time
+    };
+  }
   /**
    * Get adjacent matrix of node data
    * @returns {number[][]} adjacent matrix
@@ -318,81 +405,92 @@ class DataService {
   /* KRUSKAL function that   returns PathType that takes a  adjacentMatrix and a starting node to get a pathtype to passe by  all the nodes  */
   /**
    * Kruskal's algorithm to find Minimum Spanning Tree (MST)
-   * @param adjacentMatrix adjacent matrix of the metro network
-   * @param startNode starting node to anchor the algorithm
+   * @param Node[] The nodes of the metro network
    * @returns {PathType} Minimum Spanning Tree path
    */
-
-  private kruskal(Nodes: Node[]): PathType {
-    const nodes = Nodes;
+  private kruskal(nodes: Node[]): PathType {
+    // Create edges array using node IDs consistently
     const edges: { from: number; to: number; time: number }[] = [];
 
-    nodes.forEach((node, fromIndex) => {
+    nodes.forEach((node) => {
       node.edges.forEach((edge) => {
         edges.push({
-          from: fromIndex,
+          from: node.id,
           to: edge.to,
           time: edge.time,
         });
       });
     });
 
+    // Sort edges by time
     edges.sort((a, b) => a.time - b.time);
 
-    const parent = new Array(nodes.length).fill(0).map((_, i) => i);
+    // Initialize Union-Find data structure
+    const parent: Record<number, number> = {};
+    const rank: Record<number, number> = {};
+
     const find = (x: number): number => {
       if (parent[x] !== x) {
-        parent[x] = find(parent[x]);
+        parent[x] = find(parent[x]); // Path compression
       }
       return parent[x];
     };
-    const union = (x: number, y: number) => {
+
+    const union = (x: number, y: number): boolean => {
       const rootX = find(x);
       const rootY = find(y);
-      if (rootX !== rootY) {
+
+      if (rootX === rootY) return false;
+
+      // Union by rank
+      if (rank[rootX] > rank[rootY]) {
+        parent[rootY] = rootX;
+      } else if (rank[rootX] < rank[rootY]) {
         parent[rootX] = rootY;
-        return true;
+      } else {
+        parent[rootY] = rootX;
+        rank[rootX]++;
       }
-      return false;
+
+      return true;
     };
 
-    const mstEdges: { from: number; to: number; time: number }[] = [];
+    // Initialize Union-Find sets
+    nodes.forEach((node) => {
+      parent[node.id] = node.id;
+      rank[node.id] = 0;
+    });
+
+    // Kruskal's algorithm
+    const mstNodes = new Set<Node>();
+    const mstLines: LineType[] = [];
     let totalTime = 0;
 
-    for (const edge of edges) {
+    edges.forEach((edge) => {
       if (union(edge.from, edge.to)) {
-        mstEdges.push(edge);
-        totalTime += edge.time;
-      }
-    }
+        const fromNode = nodes.find((node) => node.id === edge.from);
+        const toNode = nodes.find((node) => node.id === edge.to);
 
-    const mstNodes: Node[] = [];
-    const mstLines: LineType[] = [];
-    const visitedNodes = new Set<number>();
+        if (fromNode && toNode) {
+          mstNodes.add(fromNode);
+          mstNodes.add(toNode);
 
-    for (const edge of mstEdges) {
-      if (!visitedNodes.has(edge.from)) {
-        const fromNode = nodes.find((n) => n.id === nodes[edge.from].id);
-        if (fromNode) {
-          mstNodes.push(fromNode);
-          visitedNodes.add(edge.from);
+          mstLines.push({
+            id: `${edge.from}-${edge.to}`,
+            coords: {
+              start: { x: fromNode.x, y: fromNode.y },
+              end: { x: toNode.x, y: toNode.y },
+            },
+            color: fromNode.color,
+          });
+
+          totalTime += edge.time;
         }
       }
-      if (!visitedNodes.has(edge.to)) {
-        const toNode = nodes.find((n) => n.id === nodes[edge.to].id);
-        if (toNode) {
-          mstNodes.push(toNode);
-          visitedNodes.add(edge.to);
-        }
-      }
-
-      const startNode = nodes[edge.from];
-      const endNode = nodes[edge.to];
-      mstLines.push(this.getLine(startNode, endNode));
-    }
+    });
 
     return {
-      nodes: mstNodes,
+      nodes: Array.from(mstNodes),
       lines: mstLines,
       time: totalTime,
     };

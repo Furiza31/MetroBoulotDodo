@@ -78,13 +78,13 @@ const onMSTStationSelected = () => {
   <section
     class="w-[350px] min-w-[350px] bg-blue-100 relative p-3 panel duration-300 flex flex-col gap-3 justify-start items-start overflow-y-auto"
   >
-    <h1 class="text-center w-full text-xl font-bold">Metro boulot dodo</h1>
+    <h1 class="text-center text-blue-600 w-full text-xl font-bold">Metro boulot dodo</h1>
     <Tabs default-value="itineraire" class="w-full h-full">
       <TabsList class="w-full">
-        <TabsTrigger value="itineraire" class="w-full">
+        <TabsTrigger value="itineraire" class="w-full ">
           Itinéraire
         </TabsTrigger>
-        <TabsTrigger value="kruskal" class="w-full"> ACPM Kruskal </TabsTrigger>
+        <TabsTrigger value="kruskal" class="w-full "> ACPM Kruskal </TabsTrigger>
       </TabsList>
       <TabsContent value="itineraire" asChild>
         <h1 class="text-lg font-bold mb-2 flex items-center gap-2">

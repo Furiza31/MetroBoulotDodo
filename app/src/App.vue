@@ -3,7 +3,7 @@ import { LoaderCircle } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import SidePanel from "./components/SidePanel.vue";
 import { dataService } from "./services/DataService";
-import { GraphService } from "./services/GraghService";
+import { GraphService } from "./services/GraphService.ts";
 import { LineType, MetroDataType, Node, PathType } from "./types/MetroDataType";
 
 const isLoading = ref(true);
