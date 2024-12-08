@@ -171,7 +171,6 @@ class DataService {
   }
 
   public display_tree(tree: PathType): PathType {
-    // Create a graph representation to check connectivity
     const graph = new Map<string, Set<string>>();
     const processedPairs = new Set<string>();
 
@@ -416,7 +415,6 @@ class DataService {
    * @returns {PathType} Minimum Spanning Tree path
    */
   private kruskal(nodes: Node[]): PathType {
-    // Create edges array using node IDs consistently
     const edges: { from: number; to: number; time: number }[] = [];
 
     nodes.forEach((node) => {
@@ -429,16 +427,14 @@ class DataService {
       });
     });
 
-    // Sort edges by time
     edges.sort((a, b) => a.time - b.time);
 
-    // Initialize Union-Find data structure
     const parent: Record<number, number> = {};
     const rank: Record<number, number> = {};
 
     const find = (x: number): number => {
       if (parent[x] !== x) {
-        parent[x] = find(parent[x]); // Path compression
+        parent[x] = find(parent[x]);
       }
       return parent[x];
     };
@@ -449,7 +445,6 @@ class DataService {
 
       if (rootX === rootY) return false;
 
-      // Union by rank
       if (rank[rootX] > rank[rootY]) {
         parent[rootY] = rootX;
       } else if (rank[rootX] < rank[rootY]) {
@@ -462,13 +457,11 @@ class DataService {
       return true;
     };
 
-    // Initialize Union-Find sets
     nodes.forEach((node) => {
       parent[node.id] = node.id;
       rank[node.id] = 0;
     });
 
-    // Kruskal's algorithm
     const mstNodes = new Set<Node>();
     const mstLines: LineType[] = [];
     let totalTime = 0;
