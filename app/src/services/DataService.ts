@@ -5,8 +5,6 @@ import {
   PathType,
 } from "src/types/MetroDataType";
 
-
-
 class DataService {
   private static instance: DataService;
   private datas: MetroDataType;
@@ -167,43 +165,41 @@ class DataService {
   }
 
   public display_tree(tree: PathType): PathType {
-    // Create a graph representation to check connectivity
     const graph = new Map<string, Set<string>>();
     const processedPairs = new Set<string>();
 
-    // Initialize the graph with all stations
-    tree.nodes.forEach(node => {
+    tree.nodes.forEach((node) => {
       const nodeKey = `${node.x},${node.y}`;
       graph.set(nodeKey, new Set());
     });
 
-    // Find the time for each line by comparing with original edges
     const getLineTime = (line: LineType): number => {
       const startNode = tree.nodes.find(
-          node => node.x === line.coords.start.x && node.y === line.coords.start.y
+        (node) =>
+          node.x === line.coords.start.x && node.y === line.coords.start.y
       );
       const endNode = tree.nodes.find(
-          node => node.x === line.coords.end.x && node.y === line.coords.end.y
+        (node) => node.x === line.coords.end.x && node.y === line.coords.end.y
       );
 
       if (!startNode || !endNode) return Infinity;
 
-      const edge = startNode.edges.find(e => {
-        const targetNode = tree.nodes.find(n => n.id === e.to);
-        return targetNode && targetNode.x === endNode.x && targetNode.y === endNode.y;
+      const edge = startNode.edges.find((e) => {
+        const targetNode = tree.nodes.find((n) => n.id === e.to);
+        return (
+          targetNode && targetNode.x === endNode.x && targetNode.y === endNode.y
+        );
       });
 
       return edge?.time ?? Infinity;
     };
 
-    // Sort lines by time
     const sortedLines = [...tree.lines].sort((a, b) => {
       const timeA = getLineTime(a);
       const timeB = getLineTime(b);
       return timeA - timeB;
     });
 
-    // Helper function to check if adding an edge would create a cycle
     const wouldCreateCycle = (start: string, end: string): boolean => {
       const visited = new Set<string>();
       const queue = [start];
@@ -222,22 +218,19 @@ class DataService {
       return false;
     };
 
-    // Filter lines to create a spanning tree
-    const filteredLines = sortedLines.filter(line => {
+    const filteredLines = sortedLines.filter((line) => {
       const startKey = `${line.coords.start.x},${line.coords.start.y}`;
       const endKey = `${line.coords.end.x},${line.coords.end.y}`;
-      const pairKey = [startKey, endKey].sort().join('_');
+      const pairKey = [startKey, endKey].sort().join("_");
 
       if (processedPairs.has(pairKey)) {
         return false;
       }
 
-      // Check if adding this line would create a cycle
       if (wouldCreateCycle(startKey, endKey)) {
         return false;
       }
 
-      // Add the connection to the graph
       graph.get(startKey)?.add(endKey);
       graph.get(endKey)?.add(startKey);
       processedPairs.add(pairKey);
@@ -247,7 +240,7 @@ class DataService {
     return {
       nodes: tree.nodes,
       lines: filteredLines,
-      time: tree.time
+      time: tree.time,
     };
   }
   /**
@@ -409,7 +402,6 @@ class DataService {
    * @returns {PathType} Minimum Spanning Tree path
    */
   private kruskal(nodes: Node[]): PathType {
-    // Create edges array using node IDs consistently
     const edges: { from: number; to: number; time: number }[] = [];
 
     nodes.forEach((node) => {
@@ -422,16 +414,14 @@ class DataService {
       });
     });
 
-    // Sort edges by time
     edges.sort((a, b) => a.time - b.time);
 
-    // Initialize Union-Find data structure
     const parent: Record<number, number> = {};
     const rank: Record<number, number> = {};
 
     const find = (x: number): number => {
       if (parent[x] !== x) {
-        parent[x] = find(parent[x]); // Path compression
+        parent[x] = find(parent[x]);
       }
       return parent[x];
     };
@@ -455,7 +445,7 @@ class DataService {
       return true;
     };
 
-    // Initialize Union-Find sets
+    // Initialize Union-Find
     nodes.forEach((node) => {
       parent[node.id] = node.id;
       rank[node.id] = 0;
