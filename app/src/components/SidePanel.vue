@@ -58,7 +58,7 @@ watch(searchInputEndStation, (value) => {
   searchResultEndStation.value = dataService.searchStation(value, false);
 });
 
-const emits = defineEmits(["select-start", "select-end", "select-mst-start"]);
+const emits = defineEmits(["select-start", "select-end", "select-mst-start","select-mst-station-start"]);
 
 const onStartStationSelected = (station: Node) => {
   searchInputStartStation.value = station.name;
@@ -69,8 +69,11 @@ const onEndStationSelected = (station: Node) => {
   searchInputEndStation.value = station.name;
   emits("select-end", station);
 };
-const onMSTStationSelected = () => {
+const onMSTSelected = () => {
   emits("select-mst-start");
+};
+const onMSTStationSelected = () => {
+  emits("select-mst-station-start");
 };
 </script>
 
@@ -187,7 +190,9 @@ const onMSTStationSelected = () => {
         <h1 class="text-lg font-bold mb-2 flex items-center gap-2">
           ACPM Kruskal
         </h1>
-        <Button class="w-full" @click="onMSTStationSelected">Calculer</Button>
+        <Button class="w-full mb-3" @click="onMSTSelected">Calculer pour un passage par chaque quai de ligne </Button>
+        </br>
+        <Button class="w-full" @click="onMSTStationSelected">Calculer kruskal pour 1 passage par station </Button>
         <div v-if="acpmPath" class="mt-1">
           <span>
             Temp de parcours: {{ Math.round(acpmPath.time / 60) }} minutes

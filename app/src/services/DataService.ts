@@ -162,6 +162,10 @@ class DataService {
    * @returns {PathType} The minimum spanning tree of the metro network
    */
   public getMinimumSpanningTree(): PathType {
+    let tree = this.kruskal(this.datas.nodes);
+    return tree;
+  }
+  public getMinimumSpanningTree_sation(): PathType {
     let tree = this.display_tree(this.kruskal(this.datas.nodes));
     return tree;
   }
@@ -171,14 +175,12 @@ class DataService {
     const graph = new Map<string, Set<string>>();
     const processedPairs = new Set<string>();
 
-    // Initialize the graph with all stations
     tree.nodes.forEach(node => {
       const nodeKey = `${node.x},${node.y}`;
       graph.set(nodeKey, new Set());
     });
 
-    // Find the time for each line by comparing with original edges
-    const getLineTime = (line: LineType): number => {
+   const getLineTime = (line: LineType): number => {
       const startNode = tree.nodes.find(
           node => node.x === line.coords.start.x && node.y === line.coords.start.y
       );
@@ -196,14 +198,12 @@ class DataService {
       return edge?.time ?? Infinity;
     };
 
-    // Sort lines by time
     const sortedLines = [...tree.lines].sort((a, b) => {
       const timeA = getLineTime(a);
       const timeB = getLineTime(b);
       return timeA - timeB;
     });
 
-    // Helper function to check if adding an edge would create a cycle
     const wouldCreateCycle = (start: string, end: string): boolean => {
       const visited = new Set<string>();
       const queue = [start];
@@ -222,7 +222,6 @@ class DataService {
       return false;
     };
 
-    // Filter lines to create a spanning tree
     const filteredLines = sortedLines.filter(line => {
       const startKey = `${line.coords.start.x},${line.coords.start.y}`;
       const endKey = `${line.coords.end.x},${line.coords.end.y}`;
@@ -232,24 +231,32 @@ class DataService {
         return false;
       }
 
-      // Check if adding this line would create a cycle
       if (wouldCreateCycle(startKey, endKey)) {
         return false;
       }
 
-      // Add the connection to the graph
       graph.get(startKey)?.add(endKey);
       graph.get(endKey)?.add(startKey);
       processedPairs.add(pairKey);
       return true;
     });
 
+    let totalFilteredTime = 0;
+    filteredLines.forEach(line => {
+      const lineTime = getLineTime(line);
+      if (lineTime !== Infinity) {
+        totalFilteredTime += lineTime;
+      }
+    });
+
     return {
       nodes: tree.nodes,
       lines: filteredLines,
-      time: tree.time
+      time: totalFilteredTime
     };
   }
+
+
   /**
    * Get adjacent matrix of node data
    * @returns {number[][]} adjacent matrix

@@ -67,6 +67,11 @@ const selectTour = () => {
   acpmPath.value = path;
   graphService.highlightPath(path, "red");
 };
+const select_acpm = () => {
+  const path = dataService.getMinimumSpanningTree_sation();
+  acpmPath.value = path;
+  graphService.highlightPath(path, "red");
+};
 
 const selectShortestPath = () => {
   if (stationOne.value && stationTwo.value) {
@@ -93,6 +98,7 @@ const selectShortestPath = () => {
         @select-start="selectStart"
         @select-end="selectEnd"
         @select-mst-start="selectTour"
+        @select-mst-station-start="select_acpm"
         :shorterPath="shorterPath"
         :acpmPath="acpmPath"
       />
